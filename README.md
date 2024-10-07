@@ -14,3 +14,6 @@ var exampleViewer = new SlickPdfView('#appendToMe', {
 </script>
 ```
 
+# Screenshot
+![screenshot](examples/example-screenshot.png)
+
