@@ -518,13 +518,13 @@ class SlickPdfView {
 				.sp-viewer .sp-page-number-input {max-width:20px;}
 				.sp-viewer .sp-scale-select-container {width:68px;}
 				@media(max-width: 600px) {
-				    .sp-document-name {display:none;}
+				    .sp-viewer .sp-document-name {display:none;}
 				}
 				@media(max-width: 800px) {
-				    .sp-scale-select-container {display:none;}
+				    .sp-viewer .sp-scale-select-container {display:none;}
 				}
 				@media(max-width: 400px) {
-				    .sp-nav-buttons, .sp-number-pages-label, .sp-page-number-input, .sp-page-label {display:none;}
+				    .sp-viewer .sp-nav-buttons, .sp-viewer .sp-number-pages-label, .sp-viewer .sp-page-number-input, .sp-viewer .sp-page-label {display:none;}
 				}
 				@media screen, print, handheld, projection {
 				    .sp-viewer .page {margin:7px auto 7px auto; position:relative; overflow:hidden; background-clip:content-box; background-color:white; box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -webkit-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -moz-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -ms-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -o-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75);}
@@ -535,7 +535,7 @@ class SlickPdfView {
 				}
 				@media only screen and (max-device-width: 800px) and (max-device-height: 800px){
 				    .sp-viewer .sp-canvas-container {top:0; bottom:0;}
-				    .sp-viewer .sp-titlebar {background-color:rgba(0, 0, 0, 0.6); background-image:none; -webkit-transition:all 0.5s; -moz-transition:all 0.5s; transition:all 0.5s;}
+				    .sp-viewer .sp-titlebar {background-color:rgba(0, 0, 0, 0.75); background-image:none; -webkit-transition:all 0.5s; -moz-transition:all 0.5s; transition:all 0.5s;}
 				    .sp-viewer .sp-titlebar {top:-32px;}
 				    .sp-viewer .sp-titlebar.viewer-touched {top:0px;}
 				    .sp-viewer .viewer-touched {display:block; opacity:1 !important;}
