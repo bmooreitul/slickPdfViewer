@@ -441,6 +441,55 @@ class SlickPdfView {
 		return this;
 	}
 
+	static iframed(wrapperSelector, settings){
+		if(typeof settings !== 'object') settings = {};
+		var tempDiv 		= document.createElement('div');
+		tempDiv.innerHTML 	= `<iframe class="sp-viewer-iframe" onload="" style="width:100%; height:calc(100vh - 20px); border:0; margin:0; padding:0;"></iframe>`;
+		var iframe 			= tempDiv.firstChild;
+		var wrapperEle 		= document.querySelector(wrapperSelector);
+		var loaded = false;
+
+		var viewerInstance = null;
+		
+		
+		wrapperEle.appendChild(iframe);
+		var html = `<!DOCTYPE html>
+			<html lang="en-US">
+			    <head>
+			        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+			        <title></title>
+			        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+			    </head>
+			    <body onload="parent.viewerInstance = window.spViewerInstance">
+			        <script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer@v1.0.02/slickPdfViewer.min.js"></script>
+			        <script>
+			        	window.spViewerInstance = new SlickPdfView('body', `+JSON.stringify(settings)+`);
+			        </script>
+			    </body>
+			</html>`;
+		iframe.contentWindow.document.open();
+		iframe.contentWindow.document.write(html);
+		iframe.contentWindow.document.close();
+
+		var res = {iframe: iframe, viewer: viewerInstance};
+
+		var viewerTimer = setInterval(function(){
+			if(typeof iframe.contentWindow.spViewerInstance != undefined){
+				res.viewer = iframe.contentWindow.spViewerInstance;
+				clearTimeout(viewerTimer);
+			}
+		}, 1000);
+
+		var timeoutCheck = function(){
+			setTimeout(function(){
+				if(viewerInstance === null){
+					timeoutCheck();
+				}
+			}, 1000);
+		}
+		return res;
+	}
+
 	triggerEvent(name, data){
 		if(typeof data == undefined) data = {};
 		var target = window.top !== window.self ? window.parent.document : document;
