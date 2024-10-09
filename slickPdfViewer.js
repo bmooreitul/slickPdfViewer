@@ -245,7 +245,7 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
         document.exitFullscreen || document.cancelFullScreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.webkitCancelFullScreen || document.msExitFullscreen || (viewerObj.elements.fullscreen.style.visibility = "hidden", 1), 
     	viewerObj.listenFor("fullscreen", viewerObj.toggleFullScreen), 
     	viewerObj.listenFor("printBtn", viewerObj.triggerPrint), 
-    	//viewerObj.listenFor("download", viewerObj.download), 
+    	
     	viewerObj.listenFor("zoomOut", viewerObj.zoomOut), 
     	viewerObj.listenFor("zoomIn", viewerObj.zoomIn), 
     	viewerObj.listenFor("previous", viewerObj.showPreviousPage), 
@@ -254,8 +254,11 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
     	viewerObj.elements.scaleSelect.addEventListener("change", function() { viewerObj.checkZoomScale(this.value) }), 
         viewerObj.elements.canvasContainer.addEventListener("click", toggleViewerTouched), 
         viewerObj.elements.titleBar.addEventListener("click", addViewerTouched), 
-        viewerObj.elements.download.setAttribute('href', viewerObj.settings.fileUrl),
-        viewerObj.elements.download.setAttribute('download', viewerObj.settings.fileName),
+
+        viewerObj.listenFor("download", viewerObj.download), 
+        //viewerObj.elements.download.setAttribute('href', 'data:application/pdf,'+viewerObj.settings.fileUrl),
+        //viewerObj.elements.download.setAttribute('target', '_blank'),
+        //viewerObj.elements.download.setAttribute('download', viewerObj.settings.fileName),
 
        
     	window.addEventListener("resize", function(b) {
@@ -338,10 +341,69 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
         this.showPage(this.currentPage - 1)
     };
     this.download = function() {
-        window.open(this.settings.fileUrl + "#viewer.action=download", "_parent")
+		function downFn(url) {
+		    const pattern = /^(ftp|http|https):\/\/[^ "]+$/;
+		    if (!pattern.test(url)) {
+		        return;
+		    }
+		    fetch(url)
+		        .then((res) => {
+		            if (!res.ok) {
+		                throw new Error("Network Problem");
+		            }
+		            return res.blob();
+		        })
+		        .then((file) => {
+		            const ex = extFn(url);
+		            let tUrl = URL.createObjectURL(file);
+		            const tmp1 = document.createElement("a");
+		            tmp1.href = tUrl;
+		            tmp1.download = `downloaded_file.${ex}`;
+		            document.body.appendChild(tmp1);
+		            tmp1.click();
+		            URL.revokeObjectURL(tUrl);
+		            tmp1.remove();
+		        })
+		        .catch(() => {
+		            console.log("Cannot Download Restricted Content!");
+		        });
+		}
+		function extFn(url) {
+		    const match = url.match(/\.[0-9a-z]+$/i);
+		    return match ? match[0].slice(1) : "";
+		}
+		downFn(this.settings.fileUrl);
+        //window.open(this.settings.fileUrl + "#viewer-"+this.settings.uniqueId+".action=download", "_parent")
     };
     this.triggerPrint = function(){
-        printJS(this.settings.fileUrl);
+
+    	try{
+    		printJS(this.settings.fileUrl);
+    	}
+    	catch{
+    		async function urlToBase64(url) {
+			  const response = await fetch(url);
+			  const blob = await response.blob();
+
+			  return new Promise((resolve, reject) => {
+			    const reader = new FileReader();
+			    reader.onloadend = () => resolve(reader.result);
+			    reader.onerror = reject;
+			    reader.readAsDataURL(blob);
+			  });
+			}
+
+			// Example usage:
+			urlToBase64(this.settings.fileUrl)
+			  .then(base64string => {
+			  	base64string = base64string.substring('data:application/pdf;base64,'.length);
+			    //console.log(base64string);
+			    printJS({printable: base64string, type: 'pdf', base64: true});
+			  })
+			  .catch(error => {
+			    console.error('Error:', error);
+			  });
+    	}
     }
     this.toggleFullScreen = function() {
         this.isFullscreen ? document.exitFullscreen ? document.exitFullscreen() : document.cancelFullScreen ? document.cancelFullScreen() : document.mozCancelFullScreen ? document.mozCancelFullScreen() : document.webkitExitFullscreen ? document.webkitExitFullscreen() : document.webkitCancelFullScreen ? document.webkitCancelFullScreen() : document.msExitFullscreen && document.msExitFullscreen() : this.elements.viewer.requestFullscreen ? this.elements.viewer.requestFullscreen() : this.elements.viewer.mozRequestFullScreen ? this.elements.viewer.mozRequestFullScreen() : this.elements.viewer.webkitRequestFullscreen ? this.elements.viewer.webkitRequestFullscreen() : this.elements.viewer.webkitRequestFullScreen ? this.elements.viewer.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT) : this.elements.viewer.msRequestFullscreen && this.elements.viewer.msRequestFullscreen()
@@ -445,9 +507,12 @@ class SlickPdfView {
 
 	static iframed(wrapperSelector, settings){
 		if(typeof settings !== 'object') settings = {};
-		var tempDiv 		= document.createElement('div');
-		tempDiv.innerHTML 	= `<iframe class="sp-viewer-iframe" onload="" style="width:100%; height:calc(100vh - 20px); border:0; margin:0; padding:0;"></iframe>`;
-		var iframe 			= tempDiv.firstChild;
+		var iframe = document.createElement('iframe');
+		
+		
+		//var tempDiv 		= document.createElement('div');
+		//tempDiv.innerHTML 	= `<iframe class="sp-viewer-iframe" onload="" style="width:100%; height:calc(100vh - 20px); border:0; margin:0; padding:0;"></iframe>`;
+		//var iframe 			= tempDiv.firstChild;
 		var wrapperEle 		= document.querySelector(wrapperSelector);
 		var loaded = false;
 
@@ -455,6 +520,11 @@ class SlickPdfView {
 		
 		
 		wrapperEle.appendChild(iframe);
+
+		iframe.setAttribute('style', 'width:100%; height:calc(100vh - 20px); border:0; margin:0; padding:0;');
+		iframe.classList.add('sp-viewer-iframe');
+		iframe.sandbox = '';
+
 		var html = `<!DOCTYPE html>
 			<html lang="en-US">
 			    <head>
@@ -463,7 +533,7 @@ class SlickPdfView {
 			        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
 			    </head>
 			    <body onload="parent.viewerInstance = window.spViewerInstance">
-			        <script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer@v1.0.04/slickPdfViewer.min.js"></script>
+			        <script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer@v1.0.05/slickPdfViewer.min.js"></script>
 			        <script>
 			        	window.spViewerInstance = new SlickPdfView('body', `+JSON.stringify(settings)+`);
 			        </script>
@@ -472,6 +542,8 @@ class SlickPdfView {
 		iframe.contentWindow.document.open();
 		iframe.contentWindow.document.write(html);
 		iframe.contentWindow.document.close();
+
+		
 
 		var res = {iframe: iframe, viewer: viewerInstance};
 
@@ -509,6 +581,12 @@ class SlickPdfView {
 		var url = new URL(this.settings.fileUrl, window.location.origin);
         (url.search || "?").substr(1).split("&").forEach(function(part) {part && (part = part.split("=", 2), res[decodeURIComponent(part[0])] = decodeURIComponent(part[1])) });
         this.requestedOptions = res;
+        try{
+        	if(this.settings.fileName === null) this.settings.fileName = url.pathname.split('/').pop();
+        }
+        catch{
+        	//SILENT
+        }
         return res;
 	}
 
@@ -656,7 +734,7 @@ class SlickPdfView {
                 <div id="titlebarRight-`+uniqueId+`" class="sp-titlebar-right">                    
                     <button id="printBtn-`+uniqueId+`" class="toolbarButton print sp-print-button" title="Print"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M128 0C92.7 0 64 28.7 64 64l0 96 64 0 0-96 226.7 0L384 93.3l0 66.7 64 0 0-66.7c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0L128 0zM384 352l0 32 0 64-256 0 0-64 0-16 0-16 256 0zm64 32l32 0c17.7 0 32-14.3 32-32l0-96c0-35.3-28.7-64-64-64L64 192c-35.3 0-64 28.7-64 64l0 96c0 17.7 14.3 32 32 32l32 0 0 64c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-64zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg></button>
                     <button id="fullscreen-`+uniqueId+`" class="toolbarButton fullscreen sp-fullscreen-button" title="Fullscreen"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg></button>
-                    <a href="#" download id="download-`+uniqueId+`" class="toolbarButton download sp-download-button" title="Download"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 242.7-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7 288 32zM64 352c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-101.5 0-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352 64 352zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg></a>
+                    <button id="download-`+uniqueId+`" class="toolbarButton download sp-download-button" title="Download"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 242.7-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7 288 32zM64 352c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-101.5 0-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352 64 352zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg></button>
                 </div>
             </div>            
             <div id="canvasContainer-`+uniqueId+`" class="sp-canvas-container"><div id="canvas-`+uniqueId+`" class="sp-canvas"></div></div>
@@ -674,6 +752,7 @@ class SlickPdfView {
             request.readyState === 4 && ((request.status >= 200 && request.status < 300 || request.status === 0) && (responseMimeType = request.getResponseHeader("content-type")) && function(){
                 try{
                     if(settings.fileName == null){
+                    	console.log(request);
                         var fileName = request.getResponseHeader('content-disposition').split('filename="').pop().split('";')[0];
                         settings.fileName = fileName;
                     }
