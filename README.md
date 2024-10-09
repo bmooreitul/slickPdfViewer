@@ -13,7 +13,7 @@ Specifically Safari refuses to show any toolbar options when for pdfs embedded i
  :heavy_check_mark: Responsive<br>
 
 ### Demo
-You can see a demo here https://codepen.io/bmooreitul/pen/YzmGBEO <br>
+You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewer/1 <br>
 > [!NOTE]
 > Please note codepen blocks the print and download functionality in the preview because the pdf is not hosted on the same domain.
 > This package doesnt currently support cross domain printing and/or download functionality.
