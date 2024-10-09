@@ -15,9 +15,7 @@ Specifically Safari refuses to show any toolbar options when for pdfs embedded i
 ### Demo
 You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewer/1 <br>
 > [!NOTE]
-> Please note codepen blocks the print and download functionality in the preview because the pdf is not hosted on the same domain.
-> This package doesnt currently support cross domain printing and/or download functionality.
-> To ensure print and download functionality work, you must host the pdf on the same domain.
+> Download functionality only works when the pdf is hosted on the same domain
 
 
 
