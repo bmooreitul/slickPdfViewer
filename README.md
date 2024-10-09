@@ -4,6 +4,11 @@ A pure Javascript PDF reader with no dependencies.
 The original purpose of this package was to resolve cross browser display issues with embedding a pdf in an iframe. 
 Specifically Safari refuses to show any toolbar options when for pdfs embedded in iframes.
 
+### Demo
+You can see a demo here https://codepen.io/bmooreitul/pen/YzmGBEO <br>
+> [!NOTE]
+> Please note codepen blocks the print and download functionality in the preview.
+
 ## Features
  :heavy_check_mark: Cross browser support<br>
  :heavy_check_mark: Iframe support<br>
