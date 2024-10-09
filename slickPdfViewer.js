@@ -491,9 +491,15 @@ class SlickPdfView {
 	}
 
 	triggerEvent(name, data){
-		if(typeof data == undefined) data = {};
-		var target = window.top !== window.self ? window.parent.document : document;
-		target.dispatchEvent(new CustomEvent(name, {detail: {viewer: this.viewer, data: data}}))
+		try{
+			if(typeof data == undefined) data = {};
+			var target = window.top !== window.self && typeof window.parent.document != undefined ? window.parent.document : document;
+			target.dispatchEvent(new CustomEvent(name, {detail: {viewer: this.viewer, data: data}}))
+		}
+		catch{
+			//SILENT
+		}
+		
 	}
 
 	urlParams(){
