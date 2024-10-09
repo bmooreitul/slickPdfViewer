@@ -1,7 +1,8 @@
 # slickPdfViewer
 A pure Javascript PDF reader with no dependencies.
 
-The original purpose of this package was to resolve cross browser display issues with embedding a pdf in an iframe. Specifically Safari refuses to show any toolbar options when for iframes.
+The original purpose of this package was to resolve cross browser display issues with embedding a pdf in an iframe. 
+Specifically Safari refuses to show any toolbar options when for pdfs embedded in iframes.
 
 ## Features
  :heavy_check_mark: Cross browser support<br>
@@ -77,7 +78,7 @@ Here are the default options when instantiating the SlickPdfView class.
 | startpage | *Optional* numeric value to specify which page is initially displayed |
 | paddingY | *Optional* numeric value for how much space to add to the inside of the viewer |
 | minScale | *Optional* numeric value to limit zooming out. For example `0.25` for 25% `0.5` for 50% etc |
-| maxScale | *Optional* numeric value to limit zooming in. For `1.25` for 125% `4` for 400% etc |
+| maxScale | *Optional* numeric value to limit zooming in. For example `1.25` for 125% `4` for 400% etc |
 | uniqueId | *Optional* value to use as a unique id for the rendered viewer to support multiple viewers on the same page.<br><br> *This is set automatically if not provided* |
 
 
