@@ -15,7 +15,7 @@ Specifically Safari refuses to show any toolbar options when for pdfs embedded i
 ### Demo
 You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewer/1 <br>
 > [!NOTE]
-> Download functionality only works when the pdf is hosted on the same domain
+> Print functionality doesn't work when embedded in an cross origin iframe. In all other scenarios, the print functionality works.
 
 
 
