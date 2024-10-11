@@ -589,7 +589,7 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
                     this.plugin.fitToPage(width, height);
                     break;
                 case "auto":
-                    this.plugin.fitToPage(width + this.settings.paddingY, height + this.settings.paddingY)
+                    this.plugin.fitToPage(width - this.settings.paddingY, height + this.settings.paddingY)
             }
             this.selectZoomLevelOption(targetScale)
         }
@@ -662,9 +662,9 @@ function SlickPDFViewerPlugin(viewObj) {
         a = d.pageIndex + 1;
         n = d.getViewport(g);
         h = document.createElement("div");
-        h.id = "pageContainer" + a;
+        h.id = "pageContainer"+a+"-".pluginObj.viewer.settings.uniqueId;
         h.className = "page";
-        h.style.display = "none";
+        //h.style.display = "none";
         m = document.createElement("canvas");
         m.id = "canvas" + a;
         b = document.createElement("div");
