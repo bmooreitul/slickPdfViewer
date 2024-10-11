@@ -13,9 +13,7 @@ Specifically Safari refuses to show any toolbar options when for pdfs embedded i
  :heavy_check_mark: Responsive<br>
 
 ### Demo
-You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewer/1 <br>
-> [!NOTE]
-> Print functionality doesn't work when embedded in an cross origin iframe. In all other scenarios, the print functionality works.
+You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewer/1
 
 
 
