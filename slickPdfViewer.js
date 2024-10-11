@@ -242,27 +242,23 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
         this.elements.documentTitle.appendChild(this.elements.documentTitle.ownerDocument.createTextNode(this.settings.fileName));
         var that = this;
 
-        document.exitFullscreen || document.cancelFullScreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.webkitCancelFullScreen || document.msExitFullscreen || (viewerObj.elements.fullscreen.style.visibility = "hidden", 1), 
-    	viewerObj.listenFor("fullscreen", viewerObj.toggleFullScreen), 
-    	viewerObj.listenFor("printBtn", viewerObj.triggerPrint), 
+        document.exitFullscreen || document.cancelFullScreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.webkitCancelFullScreen || document.msExitFullscreen || (this.elements.fullscreen.style.visibility = "hidden", 1), 
+    	this.listenFor("fullscreen", this.toggleFullScreen), 
+    	this.listenFor("printBtn", this.triggerPrint), 
     	
-    	viewerObj.listenFor("zoomOut", viewerObj.zoomOut), 
-    	viewerObj.listenFor("zoomIn", viewerObj.zoomIn), 
-    	viewerObj.listenFor("previous", viewerObj.showPreviousPage), 
-    	viewerObj.listenFor("next", viewerObj.showNextPage), 
-    	viewerObj.elements.pageNumber.addEventListener("change", function() { viewerObj.showPage(this.value) }), 
-    	viewerObj.elements.scaleSelect.addEventListener("change", function() { viewerObj.checkZoomScale(this.value) }), 
-        viewerObj.elements.canvasContainer.addEventListener("click", toggleViewerTouched), 
-        viewerObj.elements.titleBar.addEventListener("click", addViewerTouched), 
-
-        viewerObj.listenFor("download", viewerObj.download), 
-        //viewerObj.elements.download.setAttribute('href', 'data:application/pdf,'+viewerObj.settings.fileUrl),
-        //viewerObj.elements.download.setAttribute('target', '_blank'),
-        //viewerObj.elements.download.setAttribute('download', viewerObj.settings.fileName),
+    	this.listenFor("zoomOut", this.zoomOut), 
+    	this.listenFor("zoomIn", this.zoomIn), 
+    	this.listenFor("previous", this.showPreviousPage), 
+    	this.listenFor("next", this.showNextPage), 
+    	this.elements.pageNumber.addEventListener("change", function() { that.showPage(this.value) }), 
+    	this.elements.scaleSelect.addEventListener("change", function() { that.checkZoomScale(this.value) }), 
+        this.elements.canvasContainer.addEventListener("click", toggleViewerTouched), 
+        this.elements.titleBar.addEventListener("click", addViewerTouched), 
+        this.listenFor("download", this.download),
 
        
     	window.addEventListener("resize", function(b) {
-            viewerObj.pluginLoaded && (viewerObj.elements.pageWidthOption.selected || viewerObj.elements.pageAutoOption.selected) && viewerObj.checkZoomScale(viewerObj.elements.scaleSelect.value);
+            that.pluginLoaded && (that.elements.pageWidthOption.selected || that.elements.pageAutoOption.selected) && that.checkZoomScale(that.elements.scaleSelect.value);
         }), 
         window.addEventListener("keydown", function(a) {
         	var b = a.keyCode;
@@ -273,23 +269,23 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
                 case 37:
                 case 38:
                 case 80:
-                    viewerObj.showPreviousPage();
+                    that.showPreviousPage();
                     break;
                 case 13:
                 case 34:
                 case 39:
                 case 40:
                 case 78:
-                    viewerObj.showNextPage();
+                    that.showNextPage();
                     break;
                 case 32:
-                    a ? viewerObj.showPreviousPage() : viewerObj.showNextPage();
+                    a ? that.showPreviousPage() : that.showNextPage();
                     break;
                 case 36:
-                    viewerObj.showPage(1);
+                    that.showPage(1);
                     break;
                 case 35:
-                    viewerObj.showPage(viewerObj.pages.length);
+                    that.showPage(that.pages.length);
             }
     	})
         
@@ -341,69 +337,31 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
         this.showPage(this.currentPage - 1)
     };
     this.download = function() {
+    	var that;
 		function downFn(url) {
 		    const pattern = /^(ftp|http|https):\/\/[^ "]+$/;
-		    if (!pattern.test(url)) {
-		        return;
-		    }
+		    if (!(/^(ftp|http|https):\/\/[^ "]+$/).test(url)) return;
 		    fetch(url)
 		        .then((res) => {
-		            if (!res.ok) {
-		                throw new Error("Network Problem");
-		            }
+		            if(!res.ok) throw new Error("Network Problem");
 		            return res.blob();
 		        })
 		        .then((file) => {
-		            const ex = extFn(url);
 		            let tUrl = URL.createObjectURL(file);
 		            const tmp1 = document.createElement("a");
 		            tmp1.href = tUrl;
-		            tmp1.download = `downloaded_file.${ex}`;
+		            tmp1.download = viewerObj.settings.fileName;
 		            document.body.appendChild(tmp1);
 		            tmp1.click();
 		            URL.revokeObjectURL(tUrl);
 		            tmp1.remove();
-		        })
-		        .catch(() => {
-		            console.log("Cannot Download Restricted Content!");
 		        });
-		}
-		function extFn(url) {
-		    const match = url.match(/\.[0-9a-z]+$/i);
-		    return match ? match[0].slice(1) : "";
 		}
 		downFn(this.settings.fileUrl);
         //window.open(this.settings.fileUrl + "#viewer-"+this.settings.uniqueId+".action=download", "_parent")
     };
     this.triggerPrint = function(){
-
-    	try{
-    		printJS(this.settings.fileUrl);
-    	}
-    	catch{
-    		async function urlToBase64(url) {
-			  const response = await fetch(url);
-			  const blob = await response.blob();
-
-			  return new Promise((resolve, reject) => {
-			    const reader = new FileReader();
-			    reader.onloadend = () => resolve(reader.result);
-			    reader.onerror = reject;
-			    reader.readAsDataURL(blob);
-			  });
-			}
-
-			// Example usage:
-			urlToBase64(this.settings.fileUrl)
-			  .then(base64string => {
-			  	base64string = base64string.substring('data:application/pdf;base64,'.length);
-			    //console.log(base64string);
-			    printJS({printable: base64string, type: 'pdf', base64: true});
-			  })
-			  .catch(error => {
-			    console.error('Error:', error);
-			  });
-    	}
+    	printJS(this.settings.fileUrl);
     }
     this.toggleFullScreen = function() {
         this.isFullscreen ? document.exitFullscreen ? document.exitFullscreen() : document.cancelFullScreen ? document.cancelFullScreen() : document.mozCancelFullScreen ? document.mozCancelFullScreen() : document.webkitExitFullscreen ? document.webkitExitFullscreen() : document.webkitCancelFullScreen ? document.webkitCancelFullScreen() : document.msExitFullscreen && document.msExitFullscreen() : this.elements.viewer.requestFullscreen ? this.elements.viewer.requestFullscreen() : this.elements.viewer.mozRequestFullScreen ? this.elements.viewer.mozRequestFullScreen() : this.elements.viewer.webkitRequestFullscreen ? this.elements.viewer.webkitRequestFullscreen() : this.elements.viewer.webkitRequestFullScreen ? this.elements.viewer.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT) : this.elements.viewer.msRequestFullscreen && this.elements.viewer.msRequestFullscreen()
@@ -482,6 +440,8 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
 
 class SlickPdfView {
 
+	static version = '1.0.06';
+
 	settings = {
 		fileName 	: null,
 		fileUrl 	: null,
@@ -498,6 +458,15 @@ class SlickPdfView {
 	viewer 				= null;
 
 	constructor(wrapperSelector, settings){
+		if(typeof wrapperSelector == 'object' && typeof settings == 'undefined'){
+			settings 		= wrapperSelector;
+			wrapperSelector = 'body';
+		}
+		if(typeof wrapperSelector == 'string' && typeof settings == 'undefined'){
+			settings = {fileUrl: wrapperSelector};
+			wrapperSelector = 'body';
+		}
+
 		if(typeof settings === 'object' && !Array.isArray(settings) && settings !== null) for(var x in settings) this.settings[x] = settings[x];
 		this.settings.uniqueId = Date.now().toString(36)+Math.random().toString(36).substring(2, 12).padStart(12, 0);
 		this.settings.wrapper = wrapperSelector;
@@ -506,13 +475,18 @@ class SlickPdfView {
 	}
 
 	static iframed(wrapperSelector, settings){
+
+		if(typeof wrapperSelector == 'object' && typeof settings == 'undefined'){
+			settings 		= wrapperSelector;
+			wrapperSelector = 'body';
+		}
+		if(typeof wrapperSelector == 'string' && typeof settings == 'undefined'){
+			settings = {fileUrl: wrapperSelector};
+			wrapperSelector = 'body';
+		}
+
 		if(typeof settings !== 'object') settings = {};
 		var iframe = document.createElement('iframe');
-		
-		
-		//var tempDiv 		= document.createElement('div');
-		//tempDiv.innerHTML 	= `<iframe class="sp-viewer-iframe" onload="" style="width:100%; height:calc(100vh - 20px); border:0; margin:0; padding:0;"></iframe>`;
-		//var iframe 			= tempDiv.firstChild;
 		var wrapperEle 		= document.querySelector(wrapperSelector);
 		var loaded = false;
 
@@ -533,7 +507,7 @@ class SlickPdfView {
 			        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
 			    </head>
 			    <body onload="parent.viewerInstance = window.spViewerInstance">
-			        <script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer@v1.0.05/slickPdfViewer.min.js"></script>
+			        <script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer@v`+SlickPdfView.version+`/slickPdfViewer.min.js"></script>
 			        <script>
 			        	window.spViewerInstance = new SlickPdfView('body', `+JSON.stringify(settings)+`);
 			        </script>
@@ -548,7 +522,7 @@ class SlickPdfView {
 		var res = {iframe: iframe, viewer: viewerInstance};
 
 		var viewerTimer = setInterval(function(){
-			if(typeof iframe.contentWindow.spViewerInstance != undefined){
+			if(typeof iframe.contentWindow.spViewerInstance != 'undefined'){
 				res.viewer = iframe.contentWindow.spViewerInstance;
 				clearTimeout(viewerTimer);
 			}
@@ -566,8 +540,8 @@ class SlickPdfView {
 
 	triggerEvent(name, data){
 		try{
-			if(typeof data == undefined) data = {};
-			var target = window.top !== window.self && typeof window.parent.document != undefined ? window.parent.document : document;
+			if(typeof data == 'undefined') data = {};
+			var target = window.top !== window.self && typeof window.parent.document != 'undefined' ? window.parent.document : document;
 			target.dispatchEvent(new CustomEvent(name, {detail: {viewer: this.viewer, data: data}}))
 		}
 		catch{
@@ -747,22 +721,68 @@ class SlickPdfView {
 	getFile(callback){
 		var url = this.settings.fileUrl;
         var request = new XMLHttpRequest;
+        var that = this;
         request.onreadystatechange = function() {
             var responseMimeType;
             request.readyState === 4 && ((request.status >= 200 && request.status < 300 || request.status === 0) && (responseMimeType = request.getResponseHeader("content-type")) && function(){
                 try{
                     if(settings.fileName == null){
-                    	console.log(request);
                         var fileName = request.getResponseHeader('content-disposition').split('filename="').pop().split('";')[0];
                         settings.fileName = fileName;
                     }
                     if(settings.fileUrl == null) settings.fileUrl = request.responseURL;
                 }
                 catch{}
-                return "application/pdf" === responseMimeType;
+
+
+                //that.getBase64File();
+
+                return "application/pdf" === responseMimeType
             }(), callback({mime: 'application/pdf', type: 'pdf', url: url}));
         };
         request.open("HEAD", url, !0);
         request.send()
+    }
+
+    getBase64File(){
+    	function getFileAsBase64(url) {
+		  return new Promise((resolve, reject) => {
+		    const xhr = new XMLHttpRequest();
+		    xhr.open('GET', url);
+		    xhr.responseType = 'arraybuffer';
+
+		    xhr.onload = function() {
+		      if(this.status === 200) {
+		        const base64 = btoa(
+		          new Uint8Array(this.response).reduce(
+		            (data, byte) => data + String.fromCharCode(byte),
+		            ''
+		          )
+		        );
+		        resolve(base64);
+		      } else {
+		        reject(new Error('Request failed with status ' + this.status));
+		      }
+		    };
+
+		    xhr.onerror = function() {
+		      reject(new Error('Network error'));
+		    };
+
+		    xhr.send();
+		  });
+		}
+
+		var that = this;
+
+		// Example usage
+		getFileAsBase64(this.settings.fileUrl)
+		  .then(base64 => {
+		  	that.settings.base64File = base64;
+		    //console.log(base64); // Do something with the base64 string
+		  })
+		  .catch(error => {
+		    console.error(error);
+		  });
     }
 }
