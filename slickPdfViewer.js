@@ -662,7 +662,7 @@ function SlickPDFViewerPlugin(viewObj) {
         a = d.pageIndex + 1;
         n = d.getViewport(g);
         h = document.createElement("div");
-        h.id = "pageContainer"+a+"-".pluginObj.viewer.settings.uniqueId;
+        h.id = "pageContainer"+a+"-"+pluginObj.viewer.settings.uniqueId;
         h.className = "page";
         //h.style.display = "none";
         m = document.createElement("canvas");
