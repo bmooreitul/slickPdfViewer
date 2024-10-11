@@ -440,7 +440,7 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
 
 class SlickPdfView {
 
-	static version = '1.0.06';
+	static version = '1.0.07';
 
 	settings = {
 		fileName 	: null,
@@ -458,12 +458,14 @@ class SlickPdfView {
 	viewer 				= null;
 
 	constructor(wrapperSelector, settings){
+		if(typeof settings == 'string') settings = {fileUrl: settings};
+		
 		if(typeof wrapperSelector == 'object' && typeof settings == 'undefined'){
 			settings 		= wrapperSelector;
 			wrapperSelector = 'body';
 		}
 		if(typeof wrapperSelector == 'string' && typeof settings == 'undefined'){
-			settings = {fileUrl: wrapperSelector};
+			settings 		= {fileUrl: wrapperSelector};
 			wrapperSelector = 'body';
 		}
 
@@ -476,12 +478,14 @@ class SlickPdfView {
 
 	static iframed(wrapperSelector, settings){
 
+		if(typeof settings == 'string') settings = {fileUrl: settings};
+		
 		if(typeof wrapperSelector == 'object' && typeof settings == 'undefined'){
 			settings 		= wrapperSelector;
 			wrapperSelector = 'body';
 		}
 		if(typeof wrapperSelector == 'string' && typeof settings == 'undefined'){
-			settings = {fileUrl: wrapperSelector};
+			settings 		= {fileUrl: wrapperSelector};
 			wrapperSelector = 'body';
 		}
 
