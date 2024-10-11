@@ -27,6 +27,19 @@ You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewe
 The below example will render the viewer as html.
 
 ```html
+<!-- INCLUDE THE PACKAGE FROM CDN -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.js"></script>
+
+<script>
+  new SlickPdfView('https://example.com/path/to/file.pdf');
+</script>
+```
+
+## Basic Example
+
+The below example will render the viewer as html to in a specific element.
+
+```html
 <!-- THE ELEMENT THAT WILL CONTAIN THE RENDERED VIEW -->
 <div id="appendToMe"></div>
 
