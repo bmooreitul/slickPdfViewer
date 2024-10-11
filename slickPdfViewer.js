@@ -438,6 +438,10 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
     return this;
 };
 
+function slickPdfView(wrapperSelector, settings){
+	return new SlickPdfView(wrapperSelector, settings);
+}
+
 class SlickPdfView {
 
 	static version = '1.0.07';
@@ -459,7 +463,7 @@ class SlickPdfView {
 
 	constructor(wrapperSelector, settings){
 		if(typeof settings == 'string') settings = {fileUrl: settings};
-		
+
 		if(typeof wrapperSelector == 'object' && typeof settings == 'undefined'){
 			settings 		= wrapperSelector;
 			wrapperSelector = 'body';
@@ -490,12 +494,11 @@ class SlickPdfView {
 		}
 
 		if(typeof settings !== 'object') settings = {};
-		var iframe = document.createElement('iframe');
-		var wrapperEle 		= document.querySelector(wrapperSelector);
-		var loaded = false;
-
-		var viewerInstance = null;
 		
+		var iframe 			= document.createElement('iframe');
+		var wrapperEle 		= document.querySelector(wrapperSelector);
+		var loaded 			= false;
+		var viewerInstance 	= null;
 		
 		wrapperEle.appendChild(iframe);
 
@@ -521,8 +524,6 @@ class SlickPdfView {
 		iframe.contentWindow.document.write(html);
 		iframe.contentWindow.document.close();
 
-		
-
 		var res = {iframe: iframe, viewer: viewerInstance};
 
 		var viewerTimer = setInterval(function(){
@@ -532,13 +533,6 @@ class SlickPdfView {
 			}
 		}, 1000);
 
-		var timeoutCheck = function(){
-			setTimeout(function(){
-				if(viewerInstance === null){
-					timeoutCheck();
-				}
-			}, 1000);
-		}
 		return res;
 	}
 
