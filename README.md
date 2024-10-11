@@ -31,13 +31,13 @@ The below example will render the viewer as html.
 <script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.js"></script>
 
 <script>
-  new SlickPdfView('https://example.com/path/to/file.pdf');
+  slickPdfView('https://example.com/path/to/file.pdf');
 </script>
 ```
 
-## Basic Example
+## Basic Example Contained
 
-The below example will render the viewer as html to in a specific element.
+The below example will render the viewer as html contained in a specific element.
 
 ```html
 <!-- THE ELEMENT THAT WILL CONTAIN THE RENDERED VIEW -->
@@ -47,8 +47,24 @@ The below example will render the viewer as html to in a specific element.
 <script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.js"></script>
 
 <script>
-  new SlickPdfView('#appendToMe', {
-    fileUrl : 'https://example.com/path/to/file.pdf' //THE PATH TO THE PDF (CAN BE A FULL URL OR A RELATIVE PATH)
+  slickPdfView('#appendToMe', 'https://example.com/path/to/file.pdf');
+</script>
+```
+
+## Basic Example With Extra Options
+
+The below example will render the viewer as html and using additional options.
+
+```html
+<!-- INCLUDE THE PACKAGE FROM CDN -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.js"></script>
+
+<script>
+  slickPdfView({
+    fileName  : 'custom-file-name.pdf', //CUSTOM NAME WHEN DOWNLOADING/PRINTING AND IN THE TITLE BAR
+    fileUrl   : 'https://example.com/path/to/file.pdf', //THE PATH TO THE PDF (CAN BE A FULL URL OR A RELATIVE PATH)
+    zoom      : 1.25, //ZOOM IN TO 125% WHEN LOADED
+    startPage : 2, //DISPLAY THE 2nd PAGE WHEN LOADED
   });
 </script>
 ```
