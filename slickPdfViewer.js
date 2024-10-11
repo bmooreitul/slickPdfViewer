@@ -528,7 +528,8 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
         //window.open(this.settings.fileUrl + "#viewer-"+this.settings.uniqueId+".action=download", "_parent")
     };
     this.triggerPrint = function(){
-    	printJS({printable: this.settings.base64File, type: 'pdf', base64: true});
+    	printJS(this.settings.fileUrl);
+    	//printJS({printable: this.settings.base64File, type: 'pdf', base64: true});
     }
     this.toggleFullScreen = function() {
         this.isFullscreen ? document.exitFullscreen ? document.exitFullscreen() : document.cancelFullScreen ? document.cancelFullScreen() : document.mozCancelFullScreen ? document.mozCancelFullScreen() : document.webkitExitFullscreen ? document.webkitExitFullscreen() : document.webkitCancelFullScreen ? document.webkitCancelFullScreen() : document.msExitFullscreen && document.msExitFullscreen() : this.elements.viewer.requestFullscreen ? this.elements.viewer.requestFullscreen() : this.elements.viewer.mozRequestFullScreen ? this.elements.viewer.mozRequestFullScreen() : this.elements.viewer.webkitRequestFullscreen ? this.elements.viewer.webkitRequestFullscreen() : this.elements.viewer.webkitRequestFullScreen ? this.elements.viewer.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT) : this.elements.viewer.msRequestFullscreen && this.elements.viewer.msRequestFullscreen()
