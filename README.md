@@ -18,7 +18,7 @@ You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewe
 
 
 ## What it looks like
-![screenshot](examples/example-screenshot.png)
+![screenshot](examples/example2.png)
 
 # Usage
 
