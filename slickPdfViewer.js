@@ -1,4 +1,5 @@
-function slickPdfView(wrapperSelector, settings){ return new SlickPdfView(wrapperSelector, settings);}
+function slickPdfView(wrapperSelector, settings){ return new SlickPdfView(wrapperSelector, settings)};
+function slickPdfIframed(wrapperSelector, settings){ return SlickPdfView.iframed(wrapperSelector, settings)};
 
 class SlickPdfView {
 
@@ -14,47 +15,61 @@ class SlickPdfView {
 		uniqueId 	: null,
 		thumbnails 	: false,
 	};
-
 	requestedOptions 	= {};
 	viewer 				= null;
 
+	//SETUP THIS CLASS WITH THE TARGET ELEMENT AND ANY SETTINGS
 	constructor(wrapperSelector, settings){
 
+		//SET THE FILEURL SETTING IF SETTINGS IS A STRING
 		if(typeof settings == 'string') settings = {fileUrl: settings};
 
+		//IF THE WRAPPERSELECTOR IS AN OBJECT AND NO SETTINGS WERE USE IT AS SETTINGS AND SET WRAPPERSELECTOR TO USE BODY
 		if(typeof wrapperSelector == 'object' && typeof settings == 'undefined'){
 			settings 		= wrapperSelector;
 			wrapperSelector = 'body';
 		}
+
+		//IF THE WRAPPERSELECTOR IS A STRING AND NO SETTINGS WERE PASSED THEN ASSUME IT IS THE FILEURL
 		if(typeof wrapperSelector == 'string' && typeof settings == 'undefined'){
 			settings 		= {fileUrl: wrapperSelector};
 			wrapperSelector = 'body';
 		}
 
+		//MERGE THE SETTINGS
 		if(typeof settings === 'object' && !Array.isArray(settings) && settings !== null) for(var x in settings) this.settings[x] = settings[x];
 
-		this.settings.uniqueId 	= Date.now().toString(36)+Math.random().toString(36).substring(2, 12).padStart(12, 0);
-		this.settings.wrapper 	= wrapperSelector;
+		//CREATE A UNIQUE ID
+		this.settings.uniqueId 		= Date.now().toString(36)+Math.random().toString(36).substring(2, 12).padStart(12, 0);
 
-		//localStorage.clear();
-		var localStorageSettings = localStorage.getItem('slickPdfSettings');
+		//SET THE WRAPPER
+		this.settings.wrapper 		= wrapperSelector;
+
+		//TRY TO PARSE THE LOCAL STORAGE SETTINGS
+		var localStorageSettings 	= localStorage.getItem('slickPdfSettings');
 		if(typeof localStorageSettings !== 'string'){
 			localStorage.setItem('slickPdfSettings', JSON.stringify({}));
 			localStorageSettings = localStorage.getItem('slickPdfSettings');
 		}
 
+		//TRY TO USE THE PARSED LOCAL STORAGE SETTINGS
 		try{
 			var localStorageDecoded = JSON.parse(localStorageSettings);
 			if(typeof localStorageDecoded == 'object') for(var x in localStorageDecoded) this.settings[x] = localStorageDecoded[x];
 		}
 		catch{}
-		
+
+		//RENDER THE VIEWER AS LONG AS A FILEURL IS PROVIDED
 		if(this.settings.fileUrl != null) this.render();
+
+		//RETURN THIS CLASS
 		return this;
 	}
 
+	//RENDER THE VIEWER IN AN IFRAME
 	static iframed(wrapperSelector, settings){
 
+		//FIND THE SCRIPT TO USE FOR THE IFRAME
 		var scripts = document.getElementsByTagName('script');
 		var SlickPdfViewerScriptSrc;
 		for(var x in scripts){
@@ -63,30 +78,40 @@ class SlickPdfView {
 				break;
 			}
 		}
+
+		//SET THE FILEURL SETTING IF SETTINGS IS A STRING
 		if(typeof settings == 'string') settings = {fileUrl: settings};
 		
+		//IF THE WRAPPERSELECTOR IS AN OBJECT AND NO SETTINGS WERE USE IT AS SETTINGS AND SET WRAPPERSELECTOR TO USE BODY
 		if(typeof wrapperSelector == 'object' && typeof settings == 'undefined'){
 			settings 		= wrapperSelector;
 			wrapperSelector = 'body';
 		}
+
+		//IF THE WRAPPERSELECTOR IS A STRING AND NO SETTINGS WERE PASSED THEN ASSUME IT IS THE FILEURL
 		if(typeof wrapperSelector == 'string' && typeof settings == 'undefined'){
 			settings 		= {fileUrl: wrapperSelector};
 			wrapperSelector = 'body';
 		}
 
+		//IF NO SETTINGS WERE PASSED THEN INIT AN EMPTY OBJECT
 		if(typeof settings !== 'object') settings = {};
 		
+		//BUILD THE IFRAME
 		var iframe 			= document.createElement('iframe');
 		var wrapperEle 		= document.querySelector(wrapperSelector);
 		var loaded 			= false;
 		var viewerInstance 	= null;
 		
+		//ADD THE IFRAME TO THE WRAPPER ELEMENT
 		wrapperEle.appendChild(iframe);
 
+		//SET THE IFRAME ATTRIBUTES
 		iframe.setAttribute('style', 'width:100%; height:100vh; border:0; margin:0; padding:0;');
 		iframe.classList.add('sp-viewer-iframe');
 		iframe.sandbox = '';
 
+		//BUILD THE IFRAME HTML
 		var html = `<!DOCTYPE html>
 			<html lang="en-US">
 			    <head>
@@ -101,28 +126,34 @@ class SlickPdfView {
 			        </script>
 			    </body>
 			</html>`;
+
+		//SET THE IFRAME CONTENT
 		iframe.contentWindow.document.open();
 		iframe.contentWindow.document.write(html);
 		iframe.contentWindow.document.close();
 
-		var res = {iframe: iframe, viewer: function(){
-			return iframe.contentWindow.spViewerInstance;
-		}};
-
-		return res;
+		//SEND BACK THE IFRAME AND VIEWER
+		return {iframe: iframe, viewer: function(){ return iframe.contentWindow.spViewerInstance; }};
 	}
 
+	//CREATE A DOM ELEMENT
+	static createElement(html){
+		var ele = document.createElement('div');
+		ele.innerHTML = html.trim();
+		return ele.firstChild;
+	}
+
+	//TRIGGER A DOM EVENT
 	triggerEvent(name, data){
 		try{
 			if(typeof data == 'undefined') data = {};
 			var target = window.top !== window.self && typeof window.parent.document != 'undefined' ? window.parent.document : document;
 			target.dispatchEvent(new CustomEvent(name, {detail: {viewer: this.viewer, data: data}}))
 		}
-		catch{
-			//SILENT
-		}		
+		catch{}
 	}
 
+	//PARSE URL PARAMETERS FROM THE SETTINGS
 	urlParams(){
 		var res = {};
 		var url = new URL(this.settings.fileUrl, window.location.origin);
@@ -137,6 +168,7 @@ class SlickPdfView {
         return res;
 	}
 
+	//RENDER THE VIEWER
 	render(initializeCallback){
 		var fileUrl 		= this.settings.fileUrl;
         var parsedUrlParams = this.urlParams(new URL(this.settings.fileUrl, window.location.origin));
@@ -153,11 +185,16 @@ class SlickPdfView {
         return this;
 	}
 
+	//BUILD THE CSS FOR THE VIEWER IF NEEDED
 	renderCss(){
 
+		//CHECK IF THE STYLESHEET EXISTS
 		var styleExists = !!document.getElementById('sp-viewer-styles');
 
+		//IF THE STYLESHEET DOESNT EXIST
 		if(!styleExists){
+
+			//DEFINE THE CSS ELEMENT
 			var styleEle = `<style id="sp-viewer-styles">
 	        	html.sp-main-html,body.sp-main-body {position:relative; height:100%; padding:0px; margin:0px; overflow:hidden !important; font-family:sans-serif;}
 	        	.sp-viewer * {font-family:sans-serif}
@@ -205,7 +242,7 @@ class SlickPdfView {
 				.sp-viewer .sp-canvas {box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -webkit-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -moz-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -ms-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -o-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); overflow:hidden;}
 				.sp-viewer .sp-page-number-input {max-width:20px;}
 				.sp-viewer .sp-scale-select-container {width:68px;}
-				.sp-viewer .sp-thumbnail-wrap {margin-bottom: 10px; margin-top:10px; cursor:pointer;}
+				.sp-viewer .sp-thumbnail-wrap {padding-bottom: 10px; padding-top:20px; cursor:pointer;}
 				.sp-viewer .sp-thumbnail-wrap:hover canvas, .sp-viewer .sp-thumbnail-wrap.active canvas {box-shadow: 0 0 15px rgba(0,0,0,0.7)}
 				.sp-viewer .sp-thumbnail-wrap.active canvas {outline: 3px solid #5ca8f8c9;}
 				.sp-viewer .sp-thumbnail-label {text-align:center; padding:0 8px 8px; color:#b1b1b1; font-size:12px}
@@ -240,16 +277,13 @@ class SlickPdfView {
 				}
 	        </style>`;
 
+	        //FIGURE OUT WHERE TO ADD THE STYLE ELEMENT
 	        var headEle = document.querySelector('head');
-	        if(!headEle){
-	        	wrapperEle = document.querySelector(this.wrapper);
-	        	wrapperEle.innerHTML = styleEle+wrapperEle.innerHTML;
-	        }
-	        else{
-	        	headEle.innerHTML += styleEle;
-	        }
+	        if(!headEle) wrapperEle.innerHTML = styleEle+document.querySelector(this.wrapper);
+	        else headEle.innerHTML += styleEle;
 		}
 
+		//ADD HTML AND BODY CLASSES IF THIS IS AN IFRAME
 		if(window.top !== window.self){
 			document.querySelector('html').classList.add('sp-main-html');
 			document.querySelector('body').classList.add('sp-main-body');
@@ -296,7 +330,6 @@ class SlickPdfView {
                         </select>
                     </span>
                     <button id="zoomIn-`+uniqueId+`" class="toolbarButton zoomIn sp-zoom-in-button" title="Zoom In"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg></button>
-                   
                 </div>
                 <div id="titlebarRight-`+uniqueId+`" class="sp-titlebar-right">                    
                     <button id="printBtn-`+uniqueId+`" class="toolbarButton print sp-print-button" title="Print"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M128 0C92.7 0 64 28.7 64 64l0 96 64 0 0-96 226.7 0L384 93.3l0 66.7 64 0 0-66.7c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0L128 0zM384 352l0 32 0 64-256 0 0-64 0-16 0-16 256 0zm64 32l32 0c17.7 0 32-14.3 32-32l0-96c0-35.3-28.7-64-64-64L64 192c-35.3 0-64 28.7-64 64l0 96c0 17.7 14.3 32 32 32l32 0 0 64c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-64zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg></button>
@@ -377,7 +410,6 @@ class SlickPdfView {
 		getFileAsBase64(this.settings.fileUrl)
 		  .then(base64 => {
 		  	that.settings.base64File = base64;
-		    //console.log(base64); // Do something with the base64 string
 		  })
 		  .catch(error => {
 		    console.error(error);
@@ -385,93 +417,89 @@ class SlickPdfView {
     }
 }
 
-function SlickPdfViewer(viewerWrapper, initializeCallback) {
+class SlickPdfViewer {
 
-	this.viewerWrapper 	= viewerWrapper;
-    this.settings 		= viewerWrapper.settings;
-    this.plugin 		= new SlickPDFViewerPlugin(this);
-    this.pluginLoaded 	= false;
-    this.pages 			= [];
-    this.isFullscreen 	= false;
-    this.currentPage 	= 1;
-    this.elements 		= {};
-    this.customScaleSelected = false;
+	viewerWrapper;
+    settings;
+    plugin;
+    pluginLoaded 		= false;
+    pages 				= [];
+    isFullscreen 		= false;
+    currentPage 		= 1;
+    elements 			= {};
+    customScaleSelected = false;
+    calcTimer;
+    titleBarTouchTimer;
 
-    var calcTimer;
-    var titleBarTouchTimer;
-    var viewerObj 		= this;
+    constructor(viewerWrapper, initializeCallback){
+    	this.viewerWrapper 	= viewerWrapper;
+	    this.settings 		= viewerWrapper.settings;
+	    this.plugin 		= new SlickPDFViewerPlugin(this);
 
-    function forceInt(val) {
-        val = parseInt(val, 10);
-        return isNaN(val) ? 1 : val
+	    return this.initialize(initializeCallback)
     }
 
-    function addViewerTouched() {
-        viewerObj.elements.titleBar.classList.add("viewer-touched");
-        window.clearTimeout(titleBarTouchTimer);
-        titleBarTouchTimer = window.setTimeout(function() { removeViewerTouched() }, 5E3)
+    addViewerTouched(){
+    	var that = this;
+        this.elements.titleBar.classList.add("viewer-touched");
+        clearTimeout(this.titleBarTouchTimer);
+        this.titleBarTouchTimer = setTimeout(function() { that.removeViewerTouched() }, 5E3)
     }
 
-    function removeViewerTouched() {
-        viewerObj.elements.titleBar.classList.remove("viewer-touched");
+    removeViewerTouched(){
+        this.elements.titleBar.classList.remove("viewer-touched");
     }
 
-    function toggleViewerTouched() {
-        viewerObj.elements.titleBar.classList.contains("viewer-touched") ? removeViewerTouched() : addViewerTouched()
+    toggleViewerTouched(){
+        this.elements.titleBar.classList.contains("viewer-touched") ? this.removeViewerTouched() : this.addViewerTouched()
     }
 
-    this.elements.scaleSelect 			= document.getElementById("scaleSelect-"+this.settings.uniqueId);
-    this.elements.canvasContainer 		= document.getElementById("canvasContainer-"+this.settings.uniqueId);
-    this.elements.pageCount 			= document.getElementById("numPages-"+this.settings.uniqueId);
-    this.elements.documentTitle 		= document.getElementById("documentName-"+this.settings.uniqueId);
-    this.elements.titleBar 				= document.getElementById("titlebar-"+this.settings.uniqueId);
-    this.elements.printBtn 				= document.getElementById("printBtn-"+this.settings.uniqueId);
-    this.elements.next					= document.getElementById("next-"+this.settings.uniqueId);
-    this.elements.previous 				= document.getElementById("previous-"+this.settings.uniqueId);
-    this.elements.fullscreen 			= document.getElementById("fullscreen-"+this.settings.uniqueId);
-    this.elements.download 				= document.getElementById("download-"+this.settings.uniqueId);
-    this.elements.zoomOut 				= document.getElementById("zoomOut-"+this.settings.uniqueId);
-    this.elements.zoomIn 				= document.getElementById("zoomIn-"+this.settings.uniqueId);
-    this.elements.pageNumber			= document.getElementById("pageNumber-"+this.settings.uniqueId);
-    this.elements.viewer 				= document.getElementById("viewer-"+this.settings.uniqueId);
-    this.elements.pageWidthOption		= document.getElementById("pageWidthOption-"+this.settings.uniqueId);
-    this.elements.pageAutoOption		= document.getElementById("pageAutoOption-"+this.settings.uniqueId);
-    this.elements.customScaleOption		= document.getElementById("customScaleOption-"+this.settings.uniqueId);
-    this.elements.thumbnailContainer 	= document.getElementById('thumbnail-container-'+this.settings.uniqueId);
-    this.elements.thumbnailToggle 		= document.getElementById('thumbnail-toggle-'+this.settings.uniqueId);
+    initialize(callback) {
 
-    this.initialize = function(callback) {
+    	this.elements.scaleSelect 				= document.getElementById("scaleSelect-"+this.settings.uniqueId);
+	    this.elements.canvasContainer 			= document.getElementById("canvasContainer-"+this.settings.uniqueId);
+	    this.elements.pageCount 				= document.getElementById("numPages-"+this.settings.uniqueId);
+	    this.elements.documentTitle 			= document.getElementById("documentName-"+this.settings.uniqueId);
+	    this.elements.titleBar 					= document.getElementById("titlebar-"+this.settings.uniqueId);
+	    this.elements.printBtn 					= document.getElementById("printBtn-"+this.settings.uniqueId);
+	    this.elements.next						= document.getElementById("next-"+this.settings.uniqueId);
+	    this.elements.previous 					= document.getElementById("previous-"+this.settings.uniqueId);
+	    this.elements.fullscreen 				= document.getElementById("fullscreen-"+this.settings.uniqueId);
+	    this.elements.download 					= document.getElementById("download-"+this.settings.uniqueId);
+	    this.elements.zoomOut 					= document.getElementById("zoomOut-"+this.settings.uniqueId);
+	    this.elements.zoomIn 					= document.getElementById("zoomIn-"+this.settings.uniqueId);
+	    this.elements.pageNumber				= document.getElementById("pageNumber-"+this.settings.uniqueId);
+	    this.elements.viewer 					= document.getElementById("viewer-"+this.settings.uniqueId);
+	    this.elements.pageWidthOption			= document.getElementById("pageWidthOption-"+this.settings.uniqueId);
+	    this.elements.pageAutoOption			= document.getElementById("pageAutoOption-"+this.settings.uniqueId);
+	    this.elements.customScaleOption			= document.getElementById("customScaleOption-"+this.settings.uniqueId);
+	    this.elements.thumbnailContainer 		= document.getElementById('thumbnail-container-'+this.settings.uniqueId);
+	    this.elements.thumbnailToggle 			= document.getElementById('thumbnail-toggle-'+this.settings.uniqueId);
         
-        var scaleSetting			= this.setupZoomScale(this.settings.zoom);
-        document.title 				= this.settings.fileName;
-        
-        this.elements.documentTitle.innerHTML 	= "";
-        this.elements.documentTitle.appendChild(this.elements.documentTitle.ownerDocument.createTextNode(this.settings.fileName));
-        var that = this;
+        var that 								= this;
+        var scaleSetting						= this.setupZoomScale(this.settings.zoom);
+        document.title 							= this.settings.fileName;
+        this.elements.documentTitle.innerHTML 	= this.settings.fileName;
 
-        document.exitFullscreen || document.cancelFullScreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.webkitCancelFullScreen || document.msExitFullscreen || (this.elements.fullscreen.style.visibility = "hidden", 1), 
-    	this.listenFor("fullscreen", this.toggleFullScreen), 
-    	this.listenFor("printBtn", this.triggerPrint), 
-    	
-    	this.listenFor("zoomOut", this.zoomOut), 
-    	this.listenFor("zoomIn", this.zoomIn), 
-    	this.listenFor("previous", this.showPreviousPage), 
-    	this.listenFor("next", this.showNextPage), 
-    	this.elements.thumbnailToggle.addEventListener('click', function(){ that.toggleThumbnailDisplay() }),
-    	this.elements.pageNumber.addEventListener("change", function() { that.showPage(this.value) }), 
-    	this.elements.scaleSelect.addEventListener("change", function() { that.checkZoomScale(this.value) }), 
-        this.elements.canvasContainer.addEventListener("click", toggleViewerTouched), 
-        this.elements.titleBar.addEventListener("click", addViewerTouched), 
-        this.listenFor("download", this.download),
-
+        document.exitFullscreen || document.cancelFullScreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.webkitCancelFullScreen || document.msExitFullscreen || (this.elements.fullscreen.style.visibility = "hidden", 1);
+    	this.listenFor("fullscreen", this.toggleFullScreen);
+    	this.listenFor("printBtn", this.triggerPrint);
+    	this.listenFor("zoomOut", this.zoomOut);
+    	this.listenFor("zoomIn", this.zoomIn);
+    	this.listenFor("previous", this.showPreviousPage);
+    	this.listenFor("next", this.showNextPage);
+    	this.elements.thumbnailToggle.addEventListener('click', function(){ that.toggleThumbnailDisplay() });
+    	this.elements.pageNumber.addEventListener("change", function() { that.showPage(this.value) });
+    	this.elements.scaleSelect.addEventListener("change", function() { that.checkZoomScale(this.value) });
+        this.elements.canvasContainer.addEventListener("click", function(){ that.toggleViewerTouched()});
+        this.elements.titleBar.addEventListener("click", function(){ that.addViewerTouched() });
+        this.listenFor("download", this.download);
        
-    	window.addEventListener("resize", function(b) {
+    	window.addEventListener("resize", function(){
             that.pluginLoaded && (that.elements.pageWidthOption.selected || that.elements.pageAutoOption.selected) && that.checkZoomScale(that.elements.scaleSelect.value);
-        }), 
-        window.addEventListener("keydown", function(a) {
-        	var b = a.keyCode;
-        	a = a.shiftKey;
-            switch (b) {
+        });
+        window.addEventListener("keydown", function(event) {
+            switch(event.keyCode){
                 case 8:
                 case 33:
                 case 37:
@@ -487,7 +515,7 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
                     that.showNextPage();
                     break;
                 case 32:
-                    a ? that.showPreviousPage() : that.showNextPage();
+                    event.shiftKey ? that.showPreviousPage() : that.showNextPage();
                     break;
                 case 36:
                     that.showPage(1);
@@ -495,22 +523,22 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
                 case 35:
                     that.showPage(that.pages.length);
             }
-    	})
+    	});
         
-        this.plugin.initialize(function(plugin) {
+        this.plugin.initialize((plugin) => {
             that.pluginLoaded = true;
             that.pages 							= that.plugin.getPages();
             that.elements.pageCount.innerHTML 	= "/" + that.pages.length;
-            that.showPage(forceInt(that.settings.startpage));
+            that.showPage(that.settings.startpage);
             that.checkZoomScale(scaleSetting);
             that.elements.canvasContainer.onscroll = function(){ return that.calculatePageInView() };
             that.calculatePageInViewDelayed(0, callback);
         });
+
         return this;
-        
     };
 
-    this.updateStorage = function(key, val){
+    updateStorage(key, val){
     	var localStorageSettings = localStorage.getItem('slickPdfSettings');
     	if(localStorageSettings === null) localStorageSettings = JSON.stringify({});
     	localStorageSettings = JSON.parse(localStorageSettings);
@@ -518,25 +546,25 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
     	localStorage.setItem('slickPdfSettings', JSON.stringify(localStorageSettings));
     }
 
-    this.toggleThumbnailDisplay = function(){
+    toggleThumbnailDisplay(){
     	this.elements.thumbnailContainer.classList.toggle('open');
     	this.updateStorage('thumbnails', this.elements.thumbnailContainer.classList.contains('open'));
     }
 
-    this.calculatePageInViewDelayed = function(delay, callback){
-    	clearTimeout(calcTimer);
+    calculatePageInViewDelayed(delay, callback){
+    	clearTimeout(this.calcTimer);
     	var that = this;
-        calcTimer = setTimeout(function(){ that.calculatePageInView(callback); }, delay)
+        this.calcTimer = setTimeout(function(){ that.calculatePageInView(callback); }, delay)
     }
 
-    this.calculatePageInView = function(callback){
+    calculatePageInView(callback){
     	var pageInView;
         if(this.plugin.onScroll) this.plugin.onScroll();
         this.plugin.getPageInView && (pageInView = this.plugin.getPageInView()) && (this.currentPage = pageInView, this.elements.pageNumber.value = pageInView)
         if(typeof callback == 'function') callback(this);
     }
 
-    this.listenFor = function(selector, callback){
+    listenFor(selector, callback){
     	var that = this;
     	var ele = document.getElementById(selector+'-'+this.settings.uniqueId);
         ele.addEventListener("click", function() {
@@ -545,22 +573,22 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
         })
     }
 
-    this.showPage = function(targetPageNumber) {
+    showPage(targetPageNumber){
         0 >= targetPageNumber ? targetPageNumber = 1 : targetPageNumber > this.pages.length && (targetPageNumber = this.pages.length);
         this.plugin.showPage(targetPageNumber);
         this.currentPage = targetPageNumber;
         this.elements.pageNumber.value = this.currentPage;
     }
 
-    this.showNextPage = function() {
+    showNextPage(){
         this.showPage(this.currentPage + 1)
     }
 
-    this.showPreviousPage = function() {
+    showPreviousPage(){
         this.showPage(this.currentPage - 1)
     }
 
-    this.download = function() {
+    download(){
     	var that = this;
     	if(!(/^(http|https):\/\/[^ "]+$/).test(this.settings.fileUrl)) return;
     	fetch(this.settings.fileUrl)
@@ -580,21 +608,21 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
     		});
     }
 
-    this.triggerPrint = function(){
+    triggerPrint(){
     	printJS(this.settings.fileUrl);
     	//printJS({printable: this.settings.base64File, type: 'pdf', base64: true});
     }
 
-    this.toggleFullScreen = function() {
+    toggleFullScreen(){
         this.isFullscreen ? document.exitFullscreen ? document.exitFullscreen() : document.cancelFullScreen ? document.cancelFullScreen() : document.mozCancelFullScreen ? document.mozCancelFullScreen() : document.webkitExitFullscreen ? document.webkitExitFullscreen() : document.webkitCancelFullScreen ? document.webkitCancelFullScreen() : document.msExitFullscreen && document.msExitFullscreen() : this.elements.viewer.requestFullscreen ? this.elements.viewer.requestFullscreen() : this.elements.viewer.mozRequestFullScreen ? this.elements.viewer.mozRequestFullScreen() : this.elements.viewer.webkitRequestFullscreen ? this.elements.viewer.webkitRequestFullscreen() : this.elements.viewer.webkitRequestFullScreen ? this.elements.viewer.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT) : this.elements.viewer.msRequestFullscreen && this.elements.viewer.msRequestFullscreen()
     	this.isFullscreen = !this.isFullscreen;
     }
     
-    this.getZoomLevel = function() {
+    getZoomLevel(){
         return this.plugin.getZoomLevel();
     }
 
-    this.setZoomLevel = function(targetZoomLevel) {
+    setZoomLevel(targetZoomLevel) {
         this.plugin.setZoomLevel(targetZoomLevel)
         var customScaleElement = this.elements.customScaleOption,
     	c = this.selectZoomLevelOption(String(targetZoomLevel));
@@ -602,36 +630,36 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
 		c || (customScaleElement.textContent = Math.round(1E4 * targetZoomLevel) / 100 + "%", customScaleElement.selected = true)
     }
 
-    this.zoomOut = function() {
+    zoomOut(){
         this.checkZoomScale(Math.max(this.settings.minScale, (this.getZoomLevel() / 1.1).toFixed(2)), true)
     }
 
-    this.zoomIn = function() {
+    zoomIn(){
         this.checkZoomScale(Math.min(this.settings.maxScale, ((1.1 * this.getZoomLevel()).toFixed(2))), true)
     }
 
-    this.changeScale = function(targetZoomLevel, shouldReset){
+    changeScale(targetZoomLevel, shouldReset){
     	if(targetZoomLevel !== this.getZoomLevel()) {
             this.setZoomLevel(targetZoomLevel);
         }
     }
 
-    this.selectZoomLevelOption = function(val) {
+    selectZoomLevelOption(val) {
         var res = false;
-        for(var x = 0; x < viewerObj.elements.scaleSelect.options.length; x++){
-        	var option = viewerObj.elements.scaleSelect.options[x];
+        for(var x = 0; x < this.elements.scaleSelect.options.length; x++){
+        	var option = this.elements.scaleSelect.options[x];
         	option.value !== val ? option.selected = false : res = option.selected = true;
         }
         return res;
     }
 
-    this.checkZoomScale = function(targetScale, shouldReset) {
+    checkZoomScale(targetScale, shouldReset) {
         
         var currentScale;
         if (currentScale = "custom" === targetScale ? parseFloat(this.elements.customScaleOption.textContent) / 100 : parseFloat(targetScale)) this.changeScale(currentScale, true);
         else {
-            width = this.elements.canvasContainer.clientWidth - this.settings.paddingY;
-            height = this.elements.canvasContainer.clientHeight - this.settings.paddingY;
+            var width = this.elements.canvasContainer.clientWidth - this.settings.paddingY;
+            var height = this.elements.canvasContainer.clientHeight - this.settings.paddingY;
             switch (targetScale) {
                 case "page-actual":
                     this.changeScale(1, shouldReset);
@@ -647,22 +675,22 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
                     break;
                 case "auto":
                     this.plugin.fitSmart(width, height);
-                    //this.plugin.fitToPage(width - this.settings.paddingY, height + this.settings.paddingY)
             }
             this.selectZoomLevelOption(targetScale)
         }
         this.calculatePageInViewDelayed(300)
     };
 
-    this.setupZoomScale = function(targetScale) {
+    setupZoomScale(targetScale) {
         return -1 !== ["auto", "page-actual", "page-width", 'page-height'].indexOf(targetScale) ? targetScale : (targetScale = parseFloat(targetScale)) && this.settings.minScale <= targetScale && targetScale <= this.settings.maxScale ? targetScale : this.settings.zoom
     };
-
-    return this.initialize(initializeCallback)
 };
 
 class SlickPDFViewerPlugin {
 
+	//DEFINE DEFAULT CLASS VALUES
+	thumbnailScrollTimer;
+	onLoad 					= function(){};
 	viewer 					= null;
 	viewerWrapper 			= null;
 	pdfContainer 			= null;
@@ -674,36 +702,56 @@ class SlickPDFViewerPlugin {
 	viewportZoom 			= 1;
 	viewportWidth 			= 0;
 	viewportHeight 			= 0;
-	onLoad 					= function(){};
 	statusTypes 			= {
-        BLANK 			: 0,
-        RUNNING 		: 1,
-        FINISHED 		: 2,
-        RUNNINGOUTDATED : 3
+        BLANK 				: 0,
+        RUNNING 			: 1,
+        FINISHED 			: 2,
+        RUNNINGOUTDATED 	: 3
     };
-    
 
     constructor(viewObj){
-    	this.viewer = viewObj;
-    	this.viewerWrapper = this.viewer.viewerWrapper;
+    	this.viewer 		= viewObj;
+    	this.viewerWrapper 	= this.viewer.viewerWrapper;
     	return this;
+    }
+
+    initialize(callback) {
+
+    	//DEFINE THIS CLASS AS A VARIABLE
+    	var that = this;
+
+    	//SET THE CALLBACK
+    	if(typeof callback == 'function') this.onLoad = callback;
+
+    	//LOAD THE PDF
+        PDFJS.getDocument(this.viewerWrapper.settings.fileUrl).then(function(response) {
+
+        	//SET THE PDF CONTAINER
+        	that.pdfContainer = response;
+
+        	//LOOP THROUGH THE PAGES AND BUILD THEM
+            for(var x = 0; x < that.pdfContainer.numPages; x += 1) that.pdfContainer.getPage(x + 1).then(function(transportWrapper){ that.buildPageFromTransport(transportWrapper); })
+        })
     }
 
     renderScale(transportWrapper, width, height) {
         
+        //DEFINE THE ELEMENTS
         var pageContainerEle 			= this.pages[transportWrapper.pageIndex];
         var pageCanvas 					= pageContainerEle.getElementsByTagName("canvas")[0];
         var pageEle						= pageContainerEle.getElementsByTagName("div")[0];
 
+        //SET ELEMENT ATTRIBUTES
         pageContainerEle.style.width 	= width+"px";
         pageContainerEle.style.height 	= height+"px";
         pageCanvas.width 				= width;
         pageCanvas.height 				= height;
         pageEle.style.width 			= width+"px";
         pageEle.style.height 			= height+"px";
-        CustomStyle.setProp("transform", pageEle, "scale("+this.viewportZoom+","+this.viewportZoom+")");
-        CustomStyle.setProp("transformOrigin", pageEle, "0% 0%");
+        pageEle.style.transform = "scale("+this.viewportZoom+","+this.viewportZoom+")";
+        pageEle.style.transformOrigin = "0% 0%";
         
+        //SET THE TRANSPORT WRAPPER STATUS
         this.transportWrapperStatus[transportWrapper.pageIndex] = this.transportWrapperStatus[transportWrapper.pageIndex] === this.statusTypes.RUNNING ? this.statusTypes.RUNNINGOUTDATED : this.statusTypes.BLANK
     }
 
@@ -751,86 +799,57 @@ class SlickPDFViewerPlugin {
 
     buildPageFromTransport(transportWrapper) {
 
-    	var that = this;
-        var pageIndex				= transportWrapper.pageIndex + 1;
-        var viewport				= transportWrapper.getViewport(this.viewportZoom);
-        
+    	//DEFINE SOME COMMON VARS
+    	var that 				= this;
+        var pageIndex			= transportWrapper.pageIndex + 1;
+        var uniqueId 			= this.viewer.settings.uniqueId;
+        var viewport			= transportWrapper.getViewport(this.viewportZoom);
 
-        var pageContainerEle 		= document.createElement("div");
-        pageContainerEle.id 		= "pageContainer"+pageIndex+"-"+this.viewer.settings.uniqueId;
-        pageContainerEle.className 	= "sp-page";
-        pageContainerEle.setAttribute('data-sp-page-index', pageIndex);
+        //BUILD SOME ELEMENTS
+        var pageContainerEle 	= SlickPdfView.createElement(`<div id="pageContainer`+pageIndex+`-`+uniqueId+`" class="sp-page" data-sp-page-index="`+pageIndex+`"></div>`);
+        var pageCanvas 			= SlickPdfView.createElement(`<canvas id="canvas`+pageIndex+`-`+uniqueId+`" class="sp-canvas"></canvas>`);
+        var textLayerDiv 		= SlickPdfView.createElement(`<div class="sp-textLayer" id="textLayer-`+pageIndex+`-`+uniqueId+`"></div>`);
+        var thumbnailDiv 		= SlickPdfView.createElement(`<div class="sp-thumbnail-wrap" id="thumbnailwrap`+pageIndex+`-`+uniqueId+`" data-sp-page-index="`+pageIndex+`"></div>`);
+        var thumbnailCanvas 	= SlickPdfView.createElement(`<canvas width="100" height="`+(100*(viewport.height/viewport.width))+`" style="margin-left:20px;"></canvas>`);
 
-        var pageCanvas				= document.createElement("canvas");
-        pageCanvas.id 				= "canvas" +pageIndex+"-"+this.viewer.settings.uniqueId;
-        pageCanvas.className 		= "sp-canvas";
-        
-        var textLayerDiv			= document.createElement("div");
-        textLayerDiv.className 		= "sp-textLayer";
-        textLayerDiv.id 			= "textLayer-"+pageIndex+"-"+this.viewer.settings.uniqueId;
-
-        var thumbnailDiv = document.createElement('div');
-        thumbnailDiv.id = "thumbnailwrap"+pageIndex+"-"+this.viewer.settings.uniqueId;
-        thumbnailDiv.className = "sp-thumbnail-wrap";
-        thumbnailDiv.setAttribute('data-sp-page-index', pageIndex);
-
-        var thumbnailCanvas = document.createElement('canvas');
-        thumbnailCanvas.width = 100;
-        thumbnailCanvas.height = 100 *  (viewport.height / viewport.width);
-        thumbnailCanvas.setAttribute('style', 'margin-left: 20px')
-        var thumbnailScale = Math.min(thumbnailCanvas.width / viewport.width, thumbnailCanvas.height / viewport.height);
+        //RENDER THE THUMBNAIL
         transportWrapper.render({
-        	canvasContext: thumbnailCanvas.getContext("2d"),
-        	viewport: transportWrapper.getViewport(thumbnailScale)
+        	canvasContext 	: thumbnailCanvas.getContext("2d"),
+        	viewport 		: transportWrapper.getViewport(Math.min(thumbnailCanvas.width/viewport.width, thumbnailCanvas.height/viewport.height))
         }).promise.then(function(){
         	thumbnailDiv.appendChild(thumbnailCanvas);
-        	var thumbnailLabel = document.createElement('div');
-        	thumbnailLabel.className = 'sp-thumbnail-label';
-        	
-        	thumbnailLabel.innerHTML = pageIndex;
-        	thumbnailDiv.appendChild(thumbnailLabel);
-        	thumbnailDiv.addEventListener('click', function(){
-        		that.showPage(pageIndex);
-        	});
+        	thumbnailDiv.appendChild(SlickPdfView.createElement(`<div class="sp-thumbnail-label">`+pageIndex+`</div>`));
+        	thumbnailDiv.addEventListener('click', function(){ that.showPage(pageIndex); });
         });
 
+        //APPEND THE RENDERED ELEMENTS
         this.viewer.elements.thumbnailContainer.appendChild(thumbnailDiv);
-        
         pageContainerEle.appendChild(pageCanvas);
         pageContainerEle.appendChild(textLayerDiv);
-        
-        this.pages[transportWrapper.pageIndex] = pageContainerEle;
-        this.transportWrappers[transportWrapper.pageIndex] = transportWrapper;
-        this.transportWrapperStatus[transportWrapper.pageIndex] = this.statusTypes.BLANK;
+
+        //CALCULATE THE PAGE SETTINGS
+        this.pages[transportWrapper.pageIndex] 							= pageContainerEle;
+        this.transportWrappers[transportWrapper.pageIndex] 				= transportWrapper;
+        this.transportWrapperStatus[transportWrapper.pageIndex] 		= this.statusTypes.BLANK;
         this.renderScale(transportWrapper, viewport.width, viewport.height);
-        this.viewportWidth < viewport.width && (this.viewportWidth = viewport.width);
-        this.viewportHeight < viewport.height && (this.viewportHeight = viewport.height);
+        this.viewportWidth < viewport.width && (this.viewportWidth 		= viewport.width);
+        this.viewportHeight < viewport.height && (this.viewportHeight 	= viewport.height);
 
-        var textLayer = new TextLayerBuilder({
-            textLayerDiv 	: textLayerDiv,
-            viewport 		: viewport,
-            pageIndex 		: pageIndex - 1
-        });
+        //DEFINE THE TEXT LAYER
+        var textLayer = new TextLayerBuilder({textLayerDiv : textLayerDiv, viewport : viewport, pageIndex : pageIndex-1});
 
+        //RENDER THE TEXT LAYER
         transportWrapper.getTextContent().then(function(textContent) {
             textLayer.setTextContent(textContent);
             textLayer.render(200)
+            that.textLayers[transportWrapper.pageIndex] = textLayer;
         });
 
-        this.textLayers[transportWrapper.pageIndex] = textLayer;
+        //ITERATE THE PAGE COUNT
         this.pageCount += 1;
+
+        //CHECK IF WE ARE READY TO BUILD THE PAGES
         this.pageCount === this.pdfContainer.numPages && this.buildPages()
-    }
-    
-    initialize(callback) {
-    	var that = this;
-    	if(typeof callback == 'function') this.onLoad = callback;
-        PDFJS.getDocument(this.viewerWrapper.settings.fileUrl).then(function(response) {
-        	that.pdfContainer 		= response;
-            for(var x = 0; x < that.pdfContainer.numPages; x += 1) that.pdfContainer.getPage(x + 1).then(function(transportWrapper){
-            	that.buildPageFromTransport(transportWrapper);
-            })
-        })
     }
     
     getPages(){
@@ -856,7 +875,8 @@ class SlickPDFViewerPlugin {
         height && height / this.viewportHeight < targetZoom && (targetZoom = height / this.viewportHeight);
         targetZoom = Math.min(1, targetZoom);
         this.setZoomLevel(targetZoom)
-    };
+    }
+
     setZoomLevel(targetZoomLevel) {
         var viewport;
         if(this.viewportZoom !== targetZoomLevel) for (this.viewportZoom = targetZoomLevel, targetZoomLevel = 0; targetZoomLevel < this.transportWrappers.length; targetZoomLevel += 1) viewport = this.transportWrappers[targetZoomLevel].getViewport(this.viewportZoom), this.renderScale(this.transportWrappers[targetZoomLevel], viewport.width, viewport.height)
@@ -870,31 +890,65 @@ class SlickPDFViewerPlugin {
         for (a = 0; a < this.pages.length; a += 1) this.checkPageInView(this.pages[a]) && this.renderTransport(this.transportWrappers[a])
     }
 
+	//CHECK IF A PROVIDED PAGE IS SUPPOSED TO BE ACTIVE
 	checkPageInView(pageContainerEle){
 
+		//DONT BOTHER EVALUATING IF THIS PAGE ISNT DISPLAYED
 		if(pageContainerEle.style.display === 'none') return false;
-        
+
+        //CALC THE POSITIONS OF THE PAGE AND CANVAS
         var canvasContainerScrollTop 	= this.viewer.elements.canvasContainer.scrollTop;
         var canvasContainerHeight 		= canvasContainerScrollTop+this.viewer.elements.canvasContainer.clientHeight;
         var pageContainerOffsetTop 		= pageContainerEle.offsetTop;
-        var pageContainerHeight 		= pageContainerOffsetTop + pageContainerEle.clientHeight;
-        var res = pageContainerOffsetTop >= canvasContainerScrollTop && pageContainerOffsetTop < canvasContainerHeight || pageContainerHeight >= canvasContainerScrollTop && pageContainerHeight < canvasContainerHeight || pageContainerOffsetTop < canvasContainerScrollTop && pageContainerHeight >= canvasContainerHeight;
-        
-        if(res){
-        	var thumbnailWrapper = this.viewer.elements.thumbnailContainer.querySelector('.sp-thumbnail-wrap[data-sp-page-index="'+pageContainerEle.getAttribute('data-sp-page-index')+'"]');
-        	this.viewer.elements.thumbnailContainer.querySelectorAll('.sp-thumbnail-wrap').forEach((el, i) => el.classList.remove('active'));
-        	thumbnailWrapper.classList.add('active');
+
+        //CHECK IF THE PAGE CONTAINER IS AT LEAST 60% VISIBLE (THE PREVIOUS PAGE MIGHT STILL BE VISIBLE BUT WE WANT TO SET THE THUMBNAIL ACTIVE STATE TO THE FIRST PAGE THAT IS MOSTLY VISIBLE)
+        var pageContainerHeight 		= pageContainerOffsetTop + (pageContainerEle.clientHeight*0.6);
+
+        //VALIDATE IF THE PAGE IS VISIBLE AND ENOUGH OF THE PAGE IS SHOWN TO CONSIDER IT ACTIVE
+        var isActive = pageContainerOffsetTop >= canvasContainerScrollTop && pageContainerOffsetTop < canvasContainerHeight || pageContainerHeight >= canvasContainerScrollTop && pageContainerHeight < canvasContainerHeight || pageContainerOffsetTop < canvasContainerScrollTop && pageContainerHeight >= canvasContainerHeight;
+
+        //IF THE PAGE IS SUPPOSED TO BE ACTIVE
+        if(isActive && this.viewer.elements.thumbnailContainer.classList.contains('open')){
+
+        	//CLEAR ANY RUNNING THUMBNAIL SCROLL TIMERS
+    		clearTimeout(this.thumbnailScrollTimer);
+
+    		//DEFINE THIS CLASS AS A VARIABLE
+    		var that 	= this;
+
+    		//DEFINE HOW LONG TO WAIT BEFORE SCROLLING INTO VIEW
+    		var delay 	= 500;
+
+    		//START A NEW TIMER AND WAIT FOR THE DELAY
+    		this.thumbnailScrollTimer = setTimeout(function(){
+
+    			//GET THE THUMBNAIL WRAPPER
+	        	var thumbnailWrapper = that.viewer.elements.thumbnailContainer.querySelector('.sp-thumbnail-wrap[data-sp-page-index="'+pageContainerEle.getAttribute('data-sp-page-index')+'"]');
+
+	        	//REMOVE THE ACTIVE CLASS FROM ALL THE THUMBNAIL WRAPPERS
+	        	that.viewer.elements.thumbnailContainer.querySelectorAll('.sp-thumbnail-wrap').forEach((el, i) => el.classList.remove('active'));
+
+	        	//SET THE THUMBNAIL WRAPPER TO ACTIVE
+	        	thumbnailWrapper.classList.add('active');
+
+	        	//SCROLL THE THUMBNAIL INTO VIEW
+    			thumbnailWrapper.scrollIntoView({behavior: "smooth", block:"nearest"});
+
+    		}, delay);
         }
-        return res;
+
+        //RETURN IF THIS PAGE IS SUPPOSED TO BE ACTIVE
+        return isActive;
 	}
 
+	//GET THE FIRST PAGE NUMBER THAT IS VISIBLE
     getPageInView() {
     	for(var x in this.pages) if(this.checkPageInView(this.pages[x])) return Number(x)+1;
     }
 
+	//SCROLL TO A PAGE BY PAGE NUMBER
     showPage(pageNumber){
-    	var page = this.pages[pageNumber-1];
-    	page.parentNode.scrollTop = page.offsetTop;
+    	this.pages[pageNumber-1].scrollIntoView({behavior:"smooth",block:"center"});
     }
 };
 
