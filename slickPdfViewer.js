@@ -12,6 +12,7 @@ class SlickPdfView {
 		maxScale 	: 4,
 		wrapper 	: 'body',
 		uniqueId 	: null,
+		thumbnails 	: true,
 	};
 
 	requestedOptions 	= {};
@@ -110,6 +111,7 @@ class SlickPdfView {
 	urlParams(){
 		var res = {};
 		var url = new URL(this.settings.fileUrl, window.location.origin);
+		this.settings.fileUrl = url.toString();
         (url.search || "?").substr(1).split("&").forEach(function(part) {part && (part = part.split("=", 2), res[decodeURIComponent(part[0])] = decodeURIComponent(part[1])) });
         this.requestedOptions = res;
         try{
@@ -150,6 +152,7 @@ class SlickPdfView {
 				.sp-viewer .sp-titlebar {position:absolute; z-index:2; top:0px; left:0px; height:32px; width:100%; overflow:hidden; -webkit-box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); -moz-box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); background-image:linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-webkit-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-moz-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-ms-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-o-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); display:flex; justify-content:space-between;align-items: center;}
 				.sp-viewer .sp-document-name {margin-right:10px; margin-left:10px; color:#F2F2F2; line-height:1; font-family:sans-serif; display:inline-block; font-size:14px; flex-shrink: 2; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;}
 				.sp-viewer .sp-titlebar-center {display:flex; flex-shrink: 0; overflow: hidden; white-space: nowrap; min-width: 215px; align-items: center;}
+				
 				.sp-viewer .sp-titlebar-right {flex-shrink: 0; width: 100px;}
 				.sp-viewer .sp-titlebar-right>* {float:left;}
 				.sp-viewer .toolbarButton > svg {width:16px; height:16px; color:#b1b1b1}
@@ -181,12 +184,23 @@ class SlickPdfView {
 				.sp-viewer .toolbarField:hover {background-color:hsla(0, 0%, 100%, .11); border-color:hsla(0, 0%, 0%, .4) hsla(0, 0%, 0%, .43) hsla(0, 0%, 0%, .45);}
 				.sp-viewer .toolbarField:focus {background-color:hsla(0, 0%, 100%, .15); border-color:hsla(204, 100%, 65%, .8) hsla(204, 100%, 65%, .85) hsla(204, 100%, 65%, .9);}
 				.sp-viewer .sp-toolbarLabel {min-width:16px; padding:3px 6px 3px 2px; margin:4px 2px 4px 0; border:1px solid transparent; border-radius:2px; color:hsl(0, 0%, 85%); font-size:12px; line-height:1; text-align:left; -webkit-user-select:none; -moz-user-select:none; cursor:default;}
-				.sp-viewer .sp-canvas-container {overflow:auto; padding-top:6px; padding-bottom:6px; position:absolute; top:32px; right:0; bottom:0px; left:0; text-align:center; background-color:#888;}
+				.sp-viewer .sp-canvas-container {transition-property:left; transition-duration:.5s; overflow:auto; padding-top:6px; padding-bottom:6px; position:absolute; top:32px; right:0; bottom:0px; text-align:center; background-color:#888;}
+				.sp-viewer .sp-thumbnail-container:not(.open) ~ .sp-canvas-container  {left:0;}
+				.sp-viewer .sp-thumbnail-container.open ~ .sp-canvas-container  {left:150px;}
+				.sp-viewer .sp-thumbnail-container {transition-property:left; transition-duration:.5s; width:150px; top:32px; left:-150px; bottom:0px; overflow:auto; position:absolute; -webkit-box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); -moz-box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); z-index:1; background-image:linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-webkit-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-moz-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-ms-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-o-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99));}
+				.sp-viewer .sp-thumbnail-container.open {left:0px;}
 				.sp-viewer .sp-canvas {box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -webkit-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -moz-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -ms-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -o-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); overflow:hidden;}
 				.sp-viewer .sp-page-number-input {max-width:20px;}
 				.sp-viewer .sp-scale-select-container {width:68px;}
+				.sp-viewer .sp-thumbnail-wrap {margin-bottom: 10px; margin-top:10px; cursor:pointer}
+				.sp-viewer .sp-thumbnail-wrap:hover canvas {box-shadow: 0 0 15px rgba(0,0,0,0.7)}
+				.sp-viewer .sp-thumbnail-label {text-align:center; padding:0 8px 8px; color:#b1b1b1}
+				.sp-viewer .sp-thumbnail-toggle {margin-left:10px;}
 				@media(max-width: 600px) {
 				    .sp-viewer .sp-document-name {display:none;}
+				    .sp-viewer .sp-thumbnail-container.open {left:-150px !important;}
+				    .sp-viewer .sp-canvas-container {left:0px !important}
+				    .sp-viewer .sp-thumbnail-toggle {display:none !important}
 				}
 				@media(max-width: 800px) {
 				    .sp-viewer .sp-scale-select-container {display:none;}
@@ -195,9 +209,9 @@ class SlickPdfView {
 				    .sp-viewer .sp-nav-buttons, .sp-viewer .sp-number-pages-label, .sp-viewer .sp-page-number-input, .sp-viewer .sp-page-label {display:none;}
 				}
 				@media screen, print, handheld, projection {
-				    .sp-viewer .page {margin:7px auto 7px auto; position:relative; overflow:hidden; background-clip:content-box; background-color:white; box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -webkit-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -moz-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -ms-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -o-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75);}
-				    .sp-viewer .textLayer {position:absolute; left:0; top:0; right:0; bottom:0; color:#000; font-family:sans-serif; overflow:hidden;}
-				    .sp-viewer .textLayer>div {color:transparent; position:absolute; line-height:1; white-space:pre; cursor:text;}
+				    .sp-viewer .sp-page {margin:7px auto 7px auto; position:relative; overflow:hidden; background-clip:content-box; background-color:white; box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -webkit-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -moz-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -ms-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -o-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75);}
+				    .sp-viewer .sp-textLayer {position:absolute; left:0; top:0; right:0; bottom:0; color:#000; font-family:sans-serif; overflow:hidden;}
+				    .sp-viewer .sp-textLayer>div {color:transparent; position:absolute; line-height:1; white-space:pre; cursor:text;}
 				    .sp-viewer ::selection {background:rgba(0, 0, 255, 0.3);}
 				    .sp-viewer ::-moz-selection {background:rgba(0, 0, 255, 0.3);}
 				}
@@ -232,7 +246,12 @@ class SlickPdfView {
 
 		var html = `<div id="viewer-`+uniqueId+`" class="sp-viewer">
             <div id="titlebar-`+uniqueId+`" class="sp-titlebar">
-                <div id="documentName-`+uniqueId+`" class="sp-document-name"></div>
+            	<div class="sp-titlebar-left">
+	            	<button id="thumbnail-toggle-`+uniqueId+`" class="toolbarButton sp-thumbnail-toggle">
+	            		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/></svg>
+	            	</button>
+	            	<div id="documentName-`+uniqueId+`" class="sp-document-name"></div>
+            	</div>
                 <div class="sp-titlebar-center">
                     <div id="navButtons-`+uniqueId+`" class="splitToolbarButton sp-nav-buttons" style="display:none;">
                         <button id="previous-`+uniqueId+`" class="toolbarButton pageUp sp-previous-button" title="Previous Page">
@@ -269,8 +288,9 @@ class SlickPdfView {
                     <button id="fullscreen-`+uniqueId+`" class="toolbarButton fullscreen sp-fullscreen-button" title="Fullscreen"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg></button>
                     <button id="download-`+uniqueId+`" class="toolbarButton download sp-download-button" title="Download"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 242.7-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7 288 32zM64 352c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-101.5 0-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352 64 352zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg></button>
                 </div>
-            </div>            
-            <div id="canvasContainer-`+uniqueId+`" class="sp-canvas-container"><div id="canvas-`+uniqueId+`" class="sp-canvas"></div></div>
+            </div>
+            <div id="thumbnail-container-`+uniqueId+`" class="sp-thumbnail-container `+(this.settings.thumbnails === true ? 'open' : '')+`"></div>
+            <div id="canvasContainer-`+uniqueId+`" class="sp-canvas-container"></div>
         </div>`;
 
         var wrapperEle = document.querySelector(this.settings.wrapper);
@@ -285,8 +305,22 @@ class SlickPdfView {
             var responseMimeType;
             request.readyState === 4 && ((request.status >= 200 && request.status < 300 || request.status === 0) && (responseMimeType = request.getResponseHeader("content-type")) && function(){
                 try{
-                	console.log(that.settings);
-                    if(that.settings.fileName == null){
+
+                	var responseHeaders = request.getAllResponseHeaders();
+
+				    // Convert the header string into an array
+				    // of individual headers
+				    var arr = responseHeaders.trim().split(/[\r\n]+/);
+
+				    // Create a map of header names to values
+				    var headerMap = {};
+				    arr.forEach((line) => {
+				      var parts = line.split(": ");
+				      var header = parts.shift();
+				      const value = parts.join(": ");
+				      headerMap[header] = value;
+				    });
+                    if(that.settings.fileName == null && typeof headerMap['content-disposition'] != 'undefined'){
                         var fileName = request.getResponseHeader('content-disposition').split('filename="').pop().split('";')[0];
                         that.settings.fileName = fileName;
                     }
@@ -399,6 +433,8 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
     this.elements.pageWidthOption	= document.getElementById("pageWidthOption-"+this.settings.uniqueId);
     this.elements.pageAutoOption	= document.getElementById("pageAutoOption-"+this.settings.uniqueId);
     this.elements.customScaleOption	= document.getElementById("customScaleOption-"+this.settings.uniqueId);
+    this.elements.thumbnailContainer = document.getElementById('thumbnail-container-'+this.settings.uniqueId);
+    this.elements.thumbnailToggle = document.getElementById('thumbnail-toggle-'+this.settings.uniqueId);
 
     this.initialize = function(callback) {
         
@@ -417,6 +453,7 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
     	this.listenFor("zoomIn", this.zoomIn), 
     	this.listenFor("previous", this.showPreviousPage), 
     	this.listenFor("next", this.showNextPage), 
+    	this.elements.thumbnailToggle.addEventListener('click', function(){ that.toggleThumbnailDisplay() }),
     	this.elements.pageNumber.addEventListener("change", function() { that.showPage(this.value) }), 
     	this.elements.scaleSelect.addEventListener("change", function() { that.checkZoomScale(this.value) }), 
         this.elements.canvasContainer.addEventListener("click", toggleViewerTouched), 
@@ -469,6 +506,10 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
         
     };
 
+    this.toggleThumbnailDisplay = function(){
+    	this.elements.thumbnailContainer.classList.toggle('open');
+    }
+
     this.calculatePageInViewDelayed = function(delay, callback){
     	clearTimeout(calcTimer);
     	var that = this;
@@ -504,28 +545,23 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
         this.showPage(this.currentPage - 1)
     };
     this.download = function() {
-    	var that;
-		function downFn(url) {
-		    const pattern = /^(ftp|http|https):\/\/[^ "]+$/;
-		    if (!(/^(ftp|http|https):\/\/[^ "]+$/).test(url)) return;
-		    fetch(url)
-		        .then((res) => {
-		            if(!res.ok) throw new Error("Network Problem");
-		            return res.blob();
-		        })
-		        .then((file) => {
-		            let tUrl = URL.createObjectURL(file);
-		            const tmp1 = document.createElement("a");
-		            tmp1.href = tUrl;
-		            tmp1.download = viewerObj.settings.fileName;
-		            document.body.appendChild(tmp1);
-		            tmp1.click();
-		            URL.revokeObjectURL(tUrl);
-		            tmp1.remove();
-		        });
-		}
-		downFn(this.settings.fileUrl);
-        //window.open(this.settings.fileUrl + "#viewer-"+this.settings.uniqueId+".action=download", "_parent")
+    	var that = this;
+    	if(!(/^(http|https):\/\/[^ "]+$/).test(this.settings.fileUrl)) return;
+    	fetch(this.settings.fileUrl)
+    		.then((res) => {
+    			if(!res.ok) throw new Error("Network Problem");
+    			return res.blob();
+    		})
+    		.then((file) => {
+    			var tUrl 		= URL.createObjectURL(file);
+            	var tmp1 		= document.createElement("a");
+            	tmp1.href 		= tUrl;
+            	tmp1.download 	= that.settings.fileName;
+            	document.body.appendChild(tmp1);
+            	tmp1.click();
+            	URL.revokeObjectURL(tUrl);
+            	tmp1.remove();
+    		});
     };
     this.triggerPrint = function(){
     	printJS(this.settings.fileUrl);
@@ -589,7 +625,8 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
                     this.plugin.fitToPage(width, height);
                     break;
                 case "auto":
-                    this.plugin.fitToPage(width - this.settings.paddingY, height + this.settings.paddingY)
+                    this.plugin.fitSmart(width, height);
+                    //this.plugin.fitToPage(width - this.settings.paddingY, height + this.settings.paddingY)
             }
             this.selectZoomLevelOption(targetScale)
         }
@@ -603,166 +640,230 @@ function SlickPdfViewer(viewerWrapper, initializeCallback) {
     return this.initialize(initializeCallback)
 };
 
-function SlickPDFViewerPlugin(viewObj) {
-	this.viewer = viewObj;
-	this.viewerWrapper = viewObj.viewerWrapper;
-	this.pdfContainer = null;
-	var pluginObj = this;
+class SlickPDFViewerPlugin {
 
-    function f(d) {
-        if ("none" === d.style.display) return !1;
-        var a = pluginObj.viewer.elements.canvasContainer.scrollTop,
-            b = a + pluginObj.viewer.elements.canvasContainer.clientHeight,
-            c = d.offsetTop;
-        d = c + d.clientHeight;
-        return c >= a && c < b || d >= a && d < b || c < a && d >= b
+	viewer 					= null;
+	viewerWrapper 			= null;
+	pdfContainer 			= null;
+	pages 					= [];
+	transportWrapperStatus 	= [];
+	transportWrappers 		= [];
+	textLayers 				= [];
+	pageCount 				= 0;
+	viewportZoom 			= 1;
+	viewportWidth 			= 0;
+	viewportHeight 			= 0;
+	onLoad 					= function(){};
+	statusTypes 			= {
+        BLANK 			: 0,
+        RUNNING 		: 1,
+        FINISHED 		: 2,
+        RUNNINGOUTDATED : 3
+    };
+    
+
+    constructor(viewObj){
+    	this.viewer = viewObj;
+    	this.viewerWrapper = this.viewer.viewerWrapper;
+    	return this;
     }
 
-    function x(d, a, b) {
-        var e = c[d.pageIndex],
-            f = e.getElementsByTagName("canvas")[0],
-            h = e.getElementsByTagName("div")[0],
-            k = "scale(" + g + ", " + g + ")";
-        e.style.width = a + "px";
-        e.style.height = b + "px";
-        f.width = a;
-        f.height = b;
-        h.style.width = a + "px";
-        h.style.height = b + "px";
-        CustomStyle.setProp("transform",
-            h, k);
-        CustomStyle.setProp("transformOrigin", h, "0% 0%");
-        t[d.pageIndex] = t[d.pageIndex] === l.RUNNING ? l.RUNNINGOUTDATED : l.BLANK
+    renderScale(transportWrapper, width, height) {
+        
+        var pageContainerEle 			= this.pages[transportWrapper.pageIndex];
+        var pageCanvas 					= pageContainerEle.getElementsByTagName("canvas")[0];
+        var pageEle						= pageContainerEle.getElementsByTagName("div")[0];
+
+        pageContainerEle.style.width 	= width+"px";
+        pageContainerEle.style.height 	= height+"px";
+        pageCanvas.width 				= width;
+        pageCanvas.height 				= height;
+        pageEle.style.width 			= width+"px";
+        pageEle.style.height 			= height+"px";
+        CustomStyle.setProp("transform", pageEle, "scale("+this.viewportZoom+","+this.viewportZoom+")");
+        CustomStyle.setProp("transformOrigin", pageEle, "0% 0%");
+        
+        this.transportWrapperStatus[transportWrapper.pageIndex] = this.transportWrapperStatus[transportWrapper.pageIndex] === this.statusTypes.RUNNING ? this.statusTypes.RUNNINGOUTDATED : this.statusTypes.BLANK
     }
 
-    function s(d) {
-        var a, b;
-        t[d.pageIndex] === l.BLANK && (t[d.pageIndex] = l.RUNNING, a = c[d.pageIndex], b = B[d.pageIndex], a = a.getElementsByTagName("canvas")[0], d.render({
-            canvasContext: a.getContext("2d"),
-            textLayer: b,
-            viewport: d.getViewport(g)
-        }).promise.then(function() {
-            t[d.pageIndex] === l.RUNNINGOUTDATED ? (t[d.pageIndex] = l.BLANK, s(d)) : t[d.pageIndex] = l.FINISHED
-        }))
+    renderTransport(transportWrapper) {
+
+        var textLayer 	= this.textLayers[transportWrapper.pageIndex];
+        var pageCanvas 	= this.pages[transportWrapper.pageIndex].getElementsByTagName("canvas")[0];
+        var pageIndex 	= transportWrapper.pageIndex;
+        var that 		= this;
+
+        if(this.transportWrapperStatus[pageIndex] === this.statusTypes.BLANK){
+        	this.transportWrapperStatus[pageIndex] = this.statusTypes.RUNNING;
+        	transportWrapper.render({
+	            canvasContext 	: pageCanvas.getContext("2d"),
+	            textLayer 		: textLayer,
+	            viewport 		: transportWrapper.getViewport(this.viewportZoom)
+	        }).promise.then(function(){
+	        	that.checkTransportRender(transportWrapper);           
+	        })
+        }        
+    }
+    checkTransportRender(transportWrapper){
+
+    	var pageIndex 	= transportWrapper.pageIndex;
+
+    	if(this.transportWrapperStatus[pageIndex] === this.statusTypes.RUNNINGOUTDATED){
+    		this.transportWrapperStatus[pageIndex] = this.statusTypes.BLANK;
+    		this.renderTransport(transportWrapper);
+    	}
+    	else{
+    		this.transportWrapperStatus[pageIndex] = this.statusTypes.FINISHED
+    	}
     }
 
-    function k() {
-        var d = !a.isSlideshow();
-        c.forEach(function(a) {
-            d && (a.style.display = "block");
-            pluginObj.viewer.elements.canvasContainer.appendChild(a)
+    buildPages(){
+    	for(var x in this.pages){
+    		var pageContainerEle = this.pages[x];
+    		pageContainerEle.style.display = "block";
+    		this.viewer.elements.canvasContainer.appendChild(pageContainerEle);
+    	}
+        this.showPage(1);
+        this.onLoad(this)
+        this.viewerWrapper.triggerEvent('shown.it.slickpdf');
+    }
+
+    buildPageFromTransport(transportWrapper) {
+
+    	var that = this;
+        var pageIndex				= transportWrapper.pageIndex + 1;
+        var viewport				= transportWrapper.getViewport(this.viewportZoom);
+        
+
+        var pageContainerEle 		= document.createElement("div");
+        pageContainerEle.id 		= "pageContainer"+pageIndex+"-"+this.viewer.settings.uniqueId;
+        pageContainerEle.className 	= "sp-page";
+        
+        var pageCanvas				= document.createElement("canvas");
+        pageCanvas.id 				= "canvas" +pageIndex+"-"+this.viewer.settings.uniqueId;
+        pageCanvas.className 		= "sp-canvas";
+        
+        var textLayerDiv			= document.createElement("div");
+        textLayerDiv.className 		= "sp-textLayer";
+        textLayerDiv.id 			= "textLayer-"+pageIndex+"-"+this.viewer.settings.uniqueId;
+
+        var thumbnailDiv = document.createElement('div');
+        thumbnailDiv.id = "thumbnailwrap"+pageIndex+"-"+this.viewer.settings.uniqueId;
+        thumbnailDiv.className = "sp-thumbnail-wrap";
+        //thumbnailDiv.innerHTML = '<div class="sp-thumbnail-label" style="text-align:center; padding:8px; color:#b1b1b1">'+pageIndex+'</div>';
+
+        var thumbnailCanvas = document.createElement('canvas');
+        thumbnailCanvas.width = 100;
+        thumbnailCanvas.height = 100 *  (viewport.height / viewport.width);
+        thumbnailCanvas.setAttribute('style', 'margin-left: 20px')
+        var thumbnailScale = Math.min(thumbnailCanvas.width / viewport.width, thumbnailCanvas.height / viewport.height);
+        transportWrapper.render({
+        	canvasContext: thumbnailCanvas.getContext("2d"),
+        	viewport: transportWrapper.getViewport(thumbnailScale)
+        }).promise.then(function(){
+        	thumbnailDiv.appendChild(thumbnailCanvas);
+        	var thumbnailLabel = document.createElement('div');
+        	thumbnailLabel.className = 'sp-thumbnail-label';
+        	
+        	thumbnailLabel.innerHTML = pageIndex;
+        	thumbnailDiv.appendChild(thumbnailLabel);
+        	thumbnailDiv.addEventListener('click', function(){
+        		that.showPage(pageIndex);
+        	});
         });
-        pluginObj.showPage(1);
-        pluginObj.onLoad(pluginObj)
-        pluginObj.viewerWrapper.triggerEvent('shown.it.slickpdf');
-    }
 
-    function q(d) {
-        var a, b, f, m, h, n;
-        a = d.pageIndex + 1;
-        n = d.getViewport(g);
-        h = document.createElement("div");
-        h.id = "pageContainer"+a+"-"+pluginObj.viewer.settings.uniqueId;
-        h.className = "page";
-        //h.style.display = "none";
-        m = document.createElement("canvas");
-        m.id = "canvas" + a;
-        b = document.createElement("div");
-        b.className = "textLayer";
-        b.id = "textLayer" + a;
-        h.appendChild(m);
-        h.appendChild(b);
-        e[d.pageIndex] = d;
-        c[d.pageIndex] = h;
-        t[d.pageIndex] = l.BLANK;
-        x(d, n.width, n.height);
-        y < n.width &&
-            (y = n.width);
-        w < n.height && (w = n.height);
-        n.width < n.height && (p = !1);
-        f = new TextLayerBuilder({
-            textLayerDiv: b,
-            viewport: n,
-            pageIndex: a - 1
+        this.viewer.elements.thumbnailContainer.appendChild(thumbnailDiv);
+        
+        pageContainerEle.appendChild(pageCanvas);
+        pageContainerEle.appendChild(textLayerDiv);
+        
+        this.pages[transportWrapper.pageIndex] = pageContainerEle;
+        this.transportWrappers[transportWrapper.pageIndex] = transportWrapper;
+        this.transportWrapperStatus[transportWrapper.pageIndex] = this.statusTypes.BLANK;
+        this.renderScale(transportWrapper, viewport.width, viewport.height);
+        this.viewportWidth < viewport.width && (this.viewportWidth = viewport.width);
+        this.viewportHeight < viewport.height && (this.viewportHeight = viewport.height);
+
+        var textLayer = new TextLayerBuilder({
+            textLayerDiv 	: textLayerDiv,
+            viewport 		: viewport,
+            pageIndex 		: pageIndex - 1
         });
-        d.getTextContent().then(function(a) {
-            f.setTextContent(a);
-            f.render(z)
+
+        transportWrapper.getTextContent().then(function(textContent) {
+            textLayer.setTextContent(textContent);
+            textLayer.render(200)
         });
-        B[d.pageIndex] = f;
-        E += 1;
-        E === pluginObj.pdfContainer.numPages && k()
+
+        this.textLayers[transportWrapper.pageIndex] = textLayer;
+        this.pageCount += 1;
+        this.pageCount === this.pdfContainer.numPages && this.buildPages()
     }
-    var a = this,
-        e = [],
-        c = [],
-        B = [],
-        t = [],
-        l = {
-            BLANK: 0,
-            RUNNING: 1,
-            FINISHED: 2,
-            RUNNINGOUTDATED: 3
-        },
-        z = 200,
-        u = null,
-        v = null,
-        p = !0,
-        g = 1,
-        A = 1,
-        y = 0,
-        w = 0,
-        E = 0;
-    this.initialize = function(callback) {
+    
+    initialize(callback) {
     	var that = this;
     	if(typeof callback == 'function') this.onLoad = callback;
         PDFJS.getDocument(this.viewerWrapper.settings.fileUrl).then(function(response) {
         	that.pdfContainer 		= response;
-            for(var x = 0; x < that.pdfContainer.numPages; x += 1) that.pdfContainer.getPage(x + 1).then(q)
+            for(var x = 0; x < that.pdfContainer.numPages; x += 1) that.pdfContainer.getPage(x + 1).then(function(transportWrapper){
+            	that.buildPageFromTransport(transportWrapper);
+            })
         })
+    }
+    
+    getPages(){
+        return this.pages;
+    }
+
+    fitToWidth(targetWidth) {
+        this.viewportWidth !== targetWidth && (targetWidth /= this.viewportWidth, this.setZoomLevel(targetWidth))
+    }
+
+    fitToHeight(targetHeight) {
+        this.viewportHeight !== targetHeight && (targetHeight /= this.viewportHeight, this.setZoomLevel(targetHeight))
+    }
+
+    fitToPage(width, height) {
+        var targetZoom = width / this.viewportWidth;
+        height / this.viewportHeight < targetZoom && (targetZoom = height / this.viewportHeight);
+        this.setZoomLevel(targetZoom)
+    }
+
+    fitSmart(width, height) {
+        var targetZoom = width / this.viewportWidth;
+        height && height / this.viewportHeight < targetZoom && (targetZoom = height / this.viewportHeight);
+        targetZoom = Math.min(1, targetZoom);
+        this.setZoomLevel(targetZoom)
     };
-    this.isSlideshow = function() {
-        return p
+    setZoomLevel(targetZoomLevel) {
+        var viewport;
+        if(this.viewportZoom !== targetZoomLevel) for (this.viewportZoom = targetZoomLevel, targetZoomLevel = 0; targetZoomLevel < this.transportWrappers.length; targetZoomLevel += 1) viewport = this.transportWrappers[targetZoomLevel].getViewport(this.viewportZoom), this.renderScale(this.transportWrappers[targetZoomLevel], viewport.width, viewport.height)
     };
-    this.onLoad = function() {};
-    this.getPages = function() {
-        return c
-    };
-    this.fitToWidth = function(d) {
-        y !== d && (d /= y, a.setZoomLevel(d))
-    };
-    this.fitToHeight = function(d) {
-        w !== d && (d /= w, a.setZoomLevel(d))
-    };
-    this.fitToPage = function(d, b) {
-        var c = d / y;
-        b / w < c && (c = b / w);
-        a.setZoomLevel(c)
-    };
-    this.fitSmart = function(d, b) {
-        var c = d / y;
-        b && b / w < c && (c = b / w);
-        c = Math.min(1, c);
-        a.setZoomLevel(c)
-    };
-    this.setZoomLevel = function(a) {
-        var b;
-        if(g !== a) for (g = a, a = 0; a < e.length; a += 1) b = e[a].getViewport(g), x(e[a], b.width, b.height)
-    };
-    this.getZoomLevel = function() {
-        return g
-    };
-    this.onScroll = function() {
+    getZoomLevel() {
+        return this.viewportZoom
+    }
+
+    onScroll() {
         var a;
-        for (a = 0; a < c.length; a += 1) f(c[a]) && s(e[a])
-    };
-    this.getPageInView = function() {
-        var b;
-        for (b = 0; b < c.length; b += 1)
-            if (f(c[b])) return b + 1
-    };
-    this.showPage = function(b) {
-        (b = c[b - 1], b.parentNode.scrollTop = b.offsetTop)
+        for (a = 0; a < this.pages.length; a += 1) this.checkPageInView(this.pages[a]) && this.renderTransport(this.transportWrappers[a])
+    }
+
+	checkPageInView(pageContainerEle){
+		if(pageContainerEle.style.display === 'none') return false;
+        var canvasContainerScrollTop 	= this.viewer.elements.canvasContainer.scrollTop;
+        var canvasContainerHeight 		= canvasContainerScrollTop+this.viewer.elements.canvasContainer.clientHeight;
+        var pageContainerOffsetTop 		= pageContainerEle.offsetTop;
+        var pageContainerHeight 		= pageContainerOffsetTop + pageContainerEle.clientHeight;
+        return pageContainerOffsetTop >= canvasContainerScrollTop && pageContainerOffsetTop < canvasContainerHeight || pageContainerHeight >= canvasContainerScrollTop && pageContainerHeight < canvasContainerHeight || pageContainerOffsetTop < canvasContainerScrollTop && pageContainerHeight >= canvasContainerHeight;
+	};
+
+    getPageInView() {
+    	for(var x in this.pages) if(this.checkPageInView(this.pages[x])) return Number(x)+1;
+    }
+
+    showPage(pageNumber){
+    	var page = this.pages[pageNumber-1];
+    	page.parentNode.scrollTop = page.offsetTop;
     };
 };
 
@@ -779,7 +880,7 @@ c.enable(c.BLEND),c.blendFunc(c.ONE,c.ONE_MINUS_SRC_ALPHA),c.clear(c.COLOR_BUFFE
 var a=n.black?n.bold?"bolder":"bold":n.bold?"bold":"normal",o=n.italic?"italic":"normal";0>r?(r=-r,e.fontDirection=-1):e.fontDirection=1,e.fontSize=r,e.fontFamily=n.loadedName,e.fontWeight=a,e.fontStyle=o,e.tspan=document.createElementNS(s,"svg:tspan"),e.tspan.setAttributeNS(null,"y",i(-e.y)),e.xcoords=[]},endText:function(){this.current.pendingClip?(this.cgrp.appendChild(this.tgrp),this.pgrp.appendChild(this.cgrp)):this.pgrp.appendChild(this.tgrp),this.tgrp=document.createElementNS(s,"svg:g"),this.tgrp.setAttributeNS(null,"transform",r(this.transformMatrix))},setLineWidth:function(t){this.current.lineWidth=t},setLineCap:function(t){this.current.lineCap=c[t]},setLineJoin:function(t){this.current.lineJoin=h[t]},setMiterLimit:function(t){this.current.miterLimit=t},setStrokeRGBColor:function(t,e,n){var i=B.makeCssRgb(t,e,n);this.current.strokeColor=i},setFillRGBColor:function(t,e,n){var i=B.makeCssRgb(t,e,n);this.current.fillColor=i,this.current.tspan=document.createElementNS(s,"svg:tspan"),this.current.xcoords=[]},setDash:function(t,e){this.current.dashArray=t,this.current.dashPhase=e},constructPath:function(t,e){var n=this.current,r=n.x,a=n.y;n.path=document.createElementNS(s,"svg:path");for(var o=[],l=t.length,c=0,h=0;l>c;c++)switch(0|t[c]){case T.rectangle:r=e[h++],a=e[h++];var u=e[h++],d=e[h++],f=r+u,p=a+d;o.push("M",i(r),i(a),"L",i(f),i(a),"L",i(f),i(p),"L",i(r),i(p),"Z");break;case T.moveTo:r=e[h++],a=e[h++],o.push("M",i(r),i(a));break;case T.lineTo:r=e[h++],a=e[h++],o.push("L",i(r),i(a));break;case T.curveTo:r=e[h+4],a=e[h+5],o.push("C",i(e[h]),i(e[h+1]),i(e[h+2]),i(e[h+3]),i(r),i(a)),h+=6;break;case T.curveTo2:r=e[h+2],a=e[h+3],o.push("C",i(r),i(a),i(e[h]),i(e[h+1]),i(e[h+2]),i(e[h+3])),h+=4;break;case T.curveTo3:r=e[h+2],a=e[h+3],o.push("C",i(e[h]),i(e[h+1]),i(r),i(a),i(r),i(a)),h+=4;break;case T.closePath:o.push("Z")}n.path.setAttributeNS(null,"d",o.join(" ")),n.path.setAttributeNS(null,"stroke-miterlimit",i(n.miterLimit)),n.path.setAttributeNS(null,"stroke-linecap",n.lineCap),n.path.setAttributeNS(null,"stroke-linejoin",n.lineJoin),n.path.setAttributeNS(null,"stroke-width",i(n.lineWidth)+"px"),n.path.setAttributeNS(null,"stroke-dasharray",n.dashArray.map(i).join(" ")),n.path.setAttributeNS(null,"stroke-dashoffset",i(n.dashPhase)+"px"),n.path.setAttributeNS(null,"fill","none"),this.tgrp.appendChild(n.path),n.pendingClip?(this.cgrp.appendChild(this.tgrp),this.pgrp.appendChild(this.cgrp)):this.pgrp.appendChild(this.tgrp),n.element=n.path,n.setCurrentPoint(r,a)},endPath:function(){var t=this.current;t.pendingClip?(this.cgrp.appendChild(this.tgrp),this.pgrp.appendChild(this.cgrp)):this.pgrp.appendChild(this.tgrp),this.tgrp=document.createElementNS(s,"svg:g"),this.tgrp.setAttributeNS(null,"transform",r(this.transformMatrix))},clip:function(t){var e=this.current;e.clipId="clippath"+u,u++,this.clippath=document.createElementNS(s,"svg:clipPath"),this.clippath.setAttributeNS(null,"id",e.clipId);var n=e.element.cloneNode();"evenodd"===t?n.setAttributeNS(null,"clip-rule","evenodd"):n.setAttributeNS(null,"clip-rule","nonzero"),this.clippath.setAttributeNS(null,"transform",r(this.transformMatrix)),this.clippath.appendChild(n),this.defs.appendChild(this.clippath),e.pendingClip=!0,this.cgrp=document.createElementNS(s,"svg:g"),this.cgrp.setAttributeNS(null,"clip-path","url(#"+e.clipId+")"),this.pgrp.appendChild(this.cgrp)},closePath:function(){var t=this.current,e=t.path.getAttributeNS(null,"d");e+="Z",t.path.setAttributeNS(null,"d",e)},setLeading:function(t){this.current.leading=-t},setTextRise:function(t){this.current.textRise=t},setHScale:function(t){this.current.textHScale=t/100},setGState:function(t){for(var e=0,n=t.length;n>e;e++){var i=t[e],r=i[0],a=i[1];switch(r){case"LW":this.setLineWidth(a);break;case"LC":this.setLineCap(a);break;case"LJ":this.setLineJoin(a);break;case"ML":this.setMiterLimit(a);break;case"D":this.setDash(a[0],a[1]);break;case"RI":break;case"FL":break;case"Font":this.setFont(a);break;case"CA":break;case"ca":break;case"BM":break;case"SMask":}}},fill:function(){var t=this.current;t.element.setAttributeNS(null,"fill",t.fillColor)},stroke:function(){var t=this.current;t.element.setAttributeNS(null,"stroke",t.strokeColor),t.element.setAttributeNS(null,"fill","none")},eoFill:function(){var t=this.current;t.element.setAttributeNS(null,"fill",t.fillColor),t.element.setAttributeNS(null,"fill-rule","evenodd")},fillStroke:function(){this.stroke(),this.fill()},eoFillStroke:function(){this.current.element.setAttributeNS(null,"fill-rule","evenodd"),this.fillStroke()},closeStroke:function(){this.closePath(),this.stroke()},closeFillStroke:function(){this.closePath(),this.fillStroke()},paintSolidColorImageMask:function(){var t=this.current,e=document.createElementNS(s,"svg:rect");e.setAttributeNS(null,"x","0"),e.setAttributeNS(null,"y","0"),e.setAttributeNS(null,"width","1px"),e.setAttributeNS(null,"height","1px"),e.setAttributeNS(null,"fill",t.fillColor),this.tgrp.appendChild(e)},paintJpegXObject:function(t,e,n){var r=this.current,a=this.objs.get(t),o=document.createElementNS(s,"svg:image");o.setAttributeNS(l,"xlink:href",a.src),o.setAttributeNS(null,"width",a.width+"px"),o.setAttributeNS(null,"height",a.height+"px"),o.setAttributeNS(null,"x","0"),o.setAttributeNS(null,"y",i(-n)),o.setAttributeNS(null,"transform","scale("+i(1/e)+" "+i(-1/n)+")"),this.tgrp.appendChild(o),r.pendingClip?(this.cgrp.appendChild(this.tgrp),this.pgrp.appendChild(this.cgrp)):this.pgrp.appendChild(this.tgrp)},paintImageXObject:function(t){var n=this.objs.get(t);return n?void this.paintInlineImageXObject(n):void e("Dependent image isn't ready yet")},paintInlineImageXObject:function(t,e){var n=this.current,r=t.width,a=t.height,o=At(t),c=document.createElementNS(s,"svg:rect");c.setAttributeNS(null,"x","0"),c.setAttributeNS(null,"y","0"),c.setAttributeNS(null,"width",i(r)),c.setAttributeNS(null,"height",i(a)),n.element=c,this.clip("nonzero");var h=document.createElementNS(s,"svg:image");h.setAttributeNS(l,"xlink:href",o),h.setAttributeNS(null,"x","0"),h.setAttributeNS(null,"y",i(-a)),h.setAttributeNS(null,"width",i(r)+"px"),h.setAttributeNS(null,"height",i(a)+"px"),h.setAttributeNS(null,"transform","scale("+i(1/r)+" "+i(-1/a)+")"),e?e.appendChild(h):this.tgrp.appendChild(h),n.pendingClip?(this.cgrp.appendChild(this.tgrp),this.pgrp.appendChild(this.cgrp)):this.pgrp.appendChild(this.tgrp)},paintImageMaskXObject:function(t){var e=this.current,n=t.width,r=t.height,a=e.fillColor;e.maskId="mask"+d++;var o=document.createElementNS(s,"svg:mask");o.setAttributeNS(null,"id",e.maskId);var l=document.createElementNS(s,"svg:rect");l.setAttributeNS(null,"x","0"),l.setAttributeNS(null,"y","0"),l.setAttributeNS(null,"width",i(n)),l.setAttributeNS(null,"height",i(r)),l.setAttributeNS(null,"fill",a),l.setAttributeNS(null,"mask","url(#"+e.maskId+")"),this.defs.appendChild(o),this.tgrp.appendChild(l),this.paintInlineImageXObject(t,o)},paintFormXObjectBegin:function(t,e){if(this.save(),p(t)&&6===t.length&&this.transform(t[0],t[1],t[2],t[3],t[4],t[5]),p(e)&&4===e.length){var n=e[2]-e[0],r=e[3]-e[1],a=document.createElementNS(s,"svg:rect");a.setAttributeNS(null,"x",e[0]),a.setAttributeNS(null,"y",e[1]),a.setAttributeNS(null,"width",i(n)),a.setAttributeNS(null,"height",i(r)),this.current.element=a,this.clip("nonzero"),this.endPath()}},paintFormXObjectEnd:function(){this.restore()}},a}();PDFJS.SVGGraphics=mt}.call("undefined"==typeof window?this:window),PDFJS.workerSrc||"undefined"==typeof document||(PDFJS.workerSrc=function(){"use strict";var t=document.body||document.getElementsByTagName("head")[0],e=t.lastChild.src;return e&&e.replace(/\.js$/i,".worker.js")}());
 
 //CUSTOM PDF.JS TEXT LAYERS
-var CSS_UNITS=96/72,DEFAULT_SCALE="auto",UNKNOWN_SCALE=0,MAX_AUTO_SCALE=1.25,SCROLLBAR_PADDING=40,VERTICAL_PADDING=5,CustomStyle=function t(){var e=["ms","Moz","Webkit","O"],i={};function n(){}return n.getProp=function t(n,r){if(1===arguments.length&&"string"==typeof i[n])return i[n];var s,a,o=(r=r||document.documentElement).style;if("string"==typeof o[n])return i[n]=n;a=n.charAt(0).toUpperCase()+n.slice(1);for(var l=0,d=e.length;l<d;l++)if("string"==typeof o[s=e[l]+a])return i[n]=s;return i[n]="undefined"},n.setProp=function t(e,i,n){var r=this.getProp(e);"undefined"!==r&&(i.style[r]=n)},n}();function getFileName(t){var e=t.indexOf("#"),i=t.indexOf("?"),n=Math.min(e>0?e:t.length,i>0?i:t.length);return t.substring(t.lastIndexOf("/",n)+1,n)}function getOutputScale(t){var e,i=(window.devicePixelRatio||1)/(t.webkitBackingStorePixelRatio||t.mozBackingStorePixelRatio||t.msBackingStorePixelRatio||t.oBackingStorePixelRatio||t.backingStorePixelRatio||1);return{sx:i,sy:i,scaled:1!==i}}function scrollIntoView(t,e){var i=t.offsetParent,n=t.offsetTop+t.clientTop,r=t.offsetLeft+t.clientLeft;if(!i){console.error("offsetParent is not set -- cannot scroll");return}for(;i.clientHeight===i.scrollHeight;)if(i.dataset._scaleY&&(n/=i.dataset._scaleY,r/=i.dataset._scaleX),n+=i.offsetTop,r+=i.offsetLeft,!(i=i.offsetParent))return;e&&(void 0!==e.top&&(n+=e.top),void 0!==e.left&&(r+=e.left,i.scrollLeft=r)),i.scrollTop=n}function watchScroll(t,e){var i=function i(s){!r&&(r=window.requestAnimationFrame(function i(){r=null;var s=t.scrollTop,a=n.lastY;s!==a&&(n.down=s>a),n.lastY=s,e(n)}))},n={down:!0,lastY:t.scrollTop,_eventHandler:i},r=null;return t.addEventListener("scroll",i,!0),n}function binarySearchFirstItem(t,e){var i=0,n=t.length-1;if(0===t.length||!e(t[n]))return t.length;if(e(t[i]))return i;for(;i<n;){var r=i+n>>1;e(t[r])?n=r:i=r+1}return i}function getVisibleElements(t,e,i){var n,r,s,a,o,l,d=t.scrollTop,h=d+t.clientHeight,f=t.scrollLeft,c=f+t.clientWidth;function v(t){var e=t.div;return e.offsetTop+e.clientTop+e.clientHeight>d}for(var u,p,g=[],x=0===e.length?0:binarySearchFirstItem(e,v),m=x,$=e.length;m<$&&(n=(p=(u=e[m]).div).offsetTop+p.clientTop,r=p.clientHeight,!(n>h));m++)!((o=p.offsetLeft+p.clientLeft)+(l=p.clientWidth)<f)&&!(o>c)&&(s=Math.max(0,d-n)+Math.max(0,n+r-h),a=(r-s)*100/r|0,g.push({id:u.id,x:o,y:n,view:u,percent:a}));var y=g[0],C=g[g.length-1];return i&&g.sort(function(t,e){var i=t.percent-e.percent;return Math.abs(i)>.001?-i:t.id-e.id}),{first:y,last:C,views:g}}function noContextMenuHandler(t){t.preventDefault()}function getPDFFileNameFromURL(t){var e=/[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i,i=/^(?:([^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/.exec(t),n=e.exec(i[1])||e.exec(i[2])||e.exec(i[3]);if(n&&-1!==(n=n[0]).indexOf("%"))try{n=e.exec(decodeURIComponent(n))[0]}catch(r){}return n||"document.pdf"}var ProgressBar=function t(){function e(t,e){this.visible=!0,this.div=document.querySelector(t+" .progress"),this.bar=this.div.parentNode,this.height=e.height||100,this.width=e.width||100,this.units=e.units||"%",this.div.style.height=this.height+this.units,this.percent=0}return e.prototype={updateBar:function t(){if(this._indeterminate){this.div.classList.add("indeterminate"),this.div.style.width=this.width+this.units;return}this.div.classList.remove("indeterminate");var e=this.width*this._percent/100;this.div.style.width=e+this.units},get percent(){return this._percent},set percent(val){var i;this._indeterminate=isNaN(val),this._percent=Math.min(Math.max(i=val,0),100),this.updateBar()},setWidth:function t(e){if(e){var i=e.parentNode.offsetWidth-e.offsetWidth;i>0&&this.bar.setAttribute("style","width: calc(100% - "+i+"px);")}},hide:function t(){this.visible&&(this.visible=!1,this.bar.classList.add("hidden"),document.body.classList.remove("loadingInProgress"))},show:function t(){!this.visible&&(this.visible=!0,document.body.classList.add("loadingInProgress"),this.bar.classList.remove("hidden"))}},e}(),MAX_TEXT_DIVS_TO_RENDER=1e5,NonWhitespaceRegexp=/\S/;function isAllWhitespace(t){return!NonWhitespaceRegexp.test(t)}var TextLayerBuilder=function t(){function e(t){this.textLayerDiv=t.textLayerDiv,this.renderingDone=!1,this.divContentDone=!1,this.pageIdx=t.pageIndex,this.pageNumber=this.pageIdx+1,this.matches=[],this.viewport=t.viewport,this.textDivs=[],this.findController=t.findController||null}return e.prototype={_finishRendering:function t(){this.renderingDone=!0;var e=document.createEvent("CustomEvent");e.initCustomEvent("textlayerrendered",!0,!0,{pageNumber:this.pageNumber}),this.textLayerDiv.dispatchEvent(e)},renderLayer:function t(){var e=document.createDocumentFragment(),i=this.textDivs,n=i.length,r=document.createElement("canvas").getContext("2d");if(n>MAX_TEXT_DIVS_TO_RENDER){this._finishRendering();return}for(var s=0;s<n;s++){var a,o,l,d=i[s];if(void 0===d.dataset.isWhitespace){var h=d.style.fontSize,f=d.style.fontFamily;(h!==a||f!==o)&&(r.font=h+" "+f,a=h,o=f);var c=r.measureText(d.textContent).width;if(c>0){e.appendChild(d),l=void 0!==d.dataset.canvasWidth?"scaleX("+d.dataset.canvasWidth/c+")":"";var v=d.dataset.angle;v&&(l="rotate("+v+"deg) "+l),l&&CustomStyle.setProp("transform",d,l)}}}this.textLayerDiv.appendChild(e),this._finishRendering(),this.updateMatches()},render:function t(e){if(this.divContentDone&&!this.renderingDone){if(this.renderTimer&&(clearTimeout(this.renderTimer),this.renderTimer=null),e){var i=this;this.renderTimer=setTimeout(function(){i.renderLayer(),i.renderTimer=null},e)}else this.renderLayer()}},appendText:function t(e,i){var n,r,s=i[e.fontName],a=document.createElement("div");if(this.textDivs.push(a),isAllWhitespace(e.str)){a.dataset.isWhitespace=!0;return}var o=PDFJS.Util.transform(this.viewport.transform,e.transform),l=Math.atan2(o[1],o[0]);s.vertical&&(l+=Math.PI/2);var d=Math.sqrt(o[2]*o[2]+o[3]*o[3]),h=d;s.ascent?h=s.ascent*h:s.descent&&(h=(1+s.descent)*h),0===l?(n=o[4],r=o[5]-h):(n=o[4]+h*Math.sin(l),r=o[5]-h*Math.cos(l)),a.style.left=n+"px",a.style.top=r+"px",a.style.fontSize=d+"px",a.style.fontFamily=s.fontFamily,a.textContent=e.str,PDFJS.pdfBug&&(a.dataset.fontName=e.fontName),0!==l&&(a.dataset.angle=l*(180/Math.PI)),a.textContent.length>1&&(s.vertical?a.dataset.canvasWidth=e.height*this.viewport.scale:a.dataset.canvasWidth=e.width*this.viewport.scale)},setTextContent:function t(e){this.textContent=e;for(var i=e.items,n=0,r=i.length;n<r;n++)this.appendText(i[n],e.styles);this.divContentDone=!0},convertMatches:function t(e){for(var i=0,n=0,r=this.textContent.items,s=r.length-1,a=null===this.findController?0:this.findController.state.query.length,o=[],l=0,d=e.length;l<d;l++){for(var h=e[l];i!==s&&h>=n+r[i].str.length;)n+=r[i].str.length,i++;i===r.length&&console.error("Could not find a matching mapping");var f={begin:{divIdx:i,offset:h-n}};for(h+=a;i!==s&&h>n+r[i].str.length;)n+=r[i].str.length,i++;f.end={divIdx:i,offset:h-n},o.push(f)}return o},renderMatches:function t(e){if(0!==e.length){var i=this.textContent.items,n=this.textDivs,r=null,s=this.pageIdx,a=null!==this.findController&&s===this.findController.selected.pageIdx,o=null===this.findController?-1:this.findController.selected.matchIdx,l=null!==this.findController&&this.findController.state.highlightAll,d={divIdx:-1,offset:void 0},h=o,f=h+1;if(l)h=0,f=e.length;else if(!a)return;for(var c=h;c<f;c++){var v=e[c],u=v.begin,p=v.end,g=a&&c===o?" selected":"";if(this.findController&&this.findController.updateMatchPosition(s,c,n,u.divIdx,p.divIdx),r&&u.divIdx===r.divIdx?y(r.divIdx,r.offset,u.offset):(null!==r&&y(r.divIdx,r.offset,d.offset),$(u)),u.divIdx===p.divIdx)y(u.divIdx,u.offset,p.offset,"highlight"+g);else{y(u.divIdx,u.offset,d.offset,"highlight begin"+g);for(var x=u.divIdx+1,m=p.divIdx;x<m;x++)n[x].className="highlight middle"+g;$(p,"highlight end"+g)}r=p}r&&y(r.divIdx,r.offset,d.offset)}function $(t,e){var i=t.divIdx;n[i].textContent="",y(i,0,t.offset,e)}function y(t,e,r,s){var a=n[t],o=i[t].str.substring(e,r),l=document.createTextNode(o);if(s){var d=document.createElement("span");d.className=s,d.appendChild(l),a.appendChild(d);return}a.appendChild(l)}},updateMatches:function t(){if(this.renderingDone){for(var e=this.matches,i=this.textDivs,n=this.textContent.items,r=-1,s=0,a=e.length;s<a;s++){for(var o=e[s],l=Math.max(r,o.begin.divIdx),d=l,h=o.end.divIdx;d<=h;d++){var f=i[d];f.textContent=n[d].str,f.className=""}r=o.end.divIdx+1}null!==this.findController&&this.findController.active&&(this.matches=this.convertMatches(null===this.findController?[]:this.findController.pageMatches[this.pageIdx]||[]),this.renderMatches(this.matches))}}},e}();function DefaultTextLayerFactory(){}DefaultTextLayerFactory.prototype={createTextLayerBuilder:function(t,e,i){return new TextLayerBuilder({textLayerDiv:t,pageIndex:e,viewport:i})}};
+var CSS_UNITS=96/72,DEFAULT_SCALE="auto",UNKNOWN_SCALE=0,MAX_AUTO_SCALE=1,SCROLLBAR_PADDING=40,VERTICAL_PADDING=5,CustomStyle=function t(){var e=["ms","Moz","Webkit","O"],i={};function n(){}return n.getProp=function t(n,r){if(1===arguments.length&&"string"==typeof i[n])return i[n];var s,a,o=(r=r||document.documentElement).style;if("string"==typeof o[n])return i[n]=n;a=n.charAt(0).toUpperCase()+n.slice(1);for(var l=0,d=e.length;l<d;l++)if("string"==typeof o[s=e[l]+a])return i[n]=s;return i[n]="undefined"},n.setProp=function t(e,i,n){var r=this.getProp(e);"undefined"!==r&&(i.style[r]=n)},n}();function getFileName(t){var e=t.indexOf("#"),i=t.indexOf("?"),n=Math.min(e>0?e:t.length,i>0?i:t.length);return t.substring(t.lastIndexOf("/",n)+1,n)}function getOutputScale(t){var e,i=(window.devicePixelRatio||1)/(t.webkitBackingStorePixelRatio||t.mozBackingStorePixelRatio||t.msBackingStorePixelRatio||t.oBackingStorePixelRatio||t.backingStorePixelRatio||1);return{sx:i,sy:i,scaled:1!==i}}function scrollIntoView(t,e){var i=t.offsetParent,n=t.offsetTop+t.clientTop,r=t.offsetLeft+t.clientLeft;if(!i){console.error("offsetParent is not set -- cannot scroll");return}for(;i.clientHeight===i.scrollHeight;)if(i.dataset._scaleY&&(n/=i.dataset._scaleY,r/=i.dataset._scaleX),n+=i.offsetTop,r+=i.offsetLeft,!(i=i.offsetParent))return;e&&(void 0!==e.top&&(n+=e.top),void 0!==e.left&&(r+=e.left,i.scrollLeft=r)),i.scrollTop=n}function watchScroll(t,e){var i=function i(s){!r&&(r=window.requestAnimationFrame(function i(){r=null;var s=t.scrollTop,a=n.lastY;s!==a&&(n.down=s>a),n.lastY=s,e(n)}))},n={down:!0,lastY:t.scrollTop,_eventHandler:i},r=null;return t.addEventListener("scroll",i,!0),n}function binarySearchFirstItem(t,e){var i=0,n=t.length-1;if(0===t.length||!e(t[n]))return t.length;if(e(t[i]))return i;for(;i<n;){var r=i+n>>1;e(t[r])?n=r:i=r+1}return i}function getVisibleElements(t,e,i){var n,r,s,a,o,l,d=t.scrollTop,h=d+t.clientHeight,f=t.scrollLeft,c=f+t.clientWidth;function v(t){var e=t.div;return e.offsetTop+e.clientTop+e.clientHeight>d}for(var u,p,g=[],x=0===e.length?0:binarySearchFirstItem(e,v),m=x,$=e.length;m<$&&(n=(p=(u=e[m]).div).offsetTop+p.clientTop,r=p.clientHeight,!(n>h));m++)!((o=p.offsetLeft+p.clientLeft)+(l=p.clientWidth)<f)&&!(o>c)&&(s=Math.max(0,d-n)+Math.max(0,n+r-h),a=(r-s)*100/r|0,g.push({id:u.id,x:o,y:n,view:u,percent:a}));var y=g[0],C=g[g.length-1];return i&&g.sort(function(t,e){var i=t.percent-e.percent;return Math.abs(i)>.001?-i:t.id-e.id}),{first:y,last:C,views:g}}function noContextMenuHandler(t){t.preventDefault()}function getPDFFileNameFromURL(t){var e=/[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i,i=/^(?:([^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/.exec(t),n=e.exec(i[1])||e.exec(i[2])||e.exec(i[3]);if(n&&-1!==(n=n[0]).indexOf("%"))try{n=e.exec(decodeURIComponent(n))[0]}catch(r){}return n||"document.pdf"}var ProgressBar=function t(){function e(t,e){this.visible=!0,this.div=document.querySelector(t+" .progress"),this.bar=this.div.parentNode,this.height=e.height||100,this.width=e.width||100,this.units=e.units||"%",this.div.style.height=this.height+this.units,this.percent=0}return e.prototype={updateBar:function t(){if(this._indeterminate){this.div.classList.add("indeterminate"),this.div.style.width=this.width+this.units;return}this.div.classList.remove("indeterminate");var e=this.width*this._percent/100;this.div.style.width=e+this.units},get percent(){return this._percent},set percent(val){var i;this._indeterminate=isNaN(val),this._percent=Math.min(Math.max(i=val,0),100),this.updateBar()},setWidth:function t(e){if(e){var i=e.parentNode.offsetWidth-e.offsetWidth;i>0&&this.bar.setAttribute("style","width: calc(100% - "+i+"px);")}},hide:function t(){this.visible&&(this.visible=!1,this.bar.classList.add("hidden"),document.body.classList.remove("loadingInProgress"))},show:function t(){!this.visible&&(this.visible=!0,document.body.classList.add("loadingInProgress"),this.bar.classList.remove("hidden"))}},e}(),MAX_TEXT_DIVS_TO_RENDER=1e5,NonWhitespaceRegexp=/\S/;function isAllWhitespace(t){return!NonWhitespaceRegexp.test(t)}var TextLayerBuilder=function t(){function e(t){this.textLayerDiv=t.textLayerDiv,this.renderingDone=!1,this.divContentDone=!1,this.pageIdx=t.pageIndex,this.pageNumber=this.pageIdx+1,this.matches=[],this.viewport=t.viewport,this.textDivs=[],this.findController=t.findController||null}return e.prototype={_finishRendering:function t(){this.renderingDone=!0;var e=document.createEvent("CustomEvent");e.initCustomEvent("textlayerrendered",!0,!0,{pageNumber:this.pageNumber}),this.textLayerDiv.dispatchEvent(e)},renderLayer:function t(){var e=document.createDocumentFragment(),i=this.textDivs,n=i.length,r=document.createElement("canvas").getContext("2d");if(n>MAX_TEXT_DIVS_TO_RENDER){this._finishRendering();return}for(var s=0;s<n;s++){var a,o,l,d=i[s];if(void 0===d.dataset.isWhitespace){var h=d.style.fontSize,f=d.style.fontFamily;(h!==a||f!==o)&&(r.font=h+" "+f,a=h,o=f);var c=r.measureText(d.textContent).width;if(c>0){e.appendChild(d),l=void 0!==d.dataset.canvasWidth?"scaleX("+d.dataset.canvasWidth/c+")":"";var v=d.dataset.angle;v&&(l="rotate("+v+"deg) "+l),l&&CustomStyle.setProp("transform",d,l)}}}this.textLayerDiv.appendChild(e),this._finishRendering(),this.updateMatches()},render:function t(e){if(this.divContentDone&&!this.renderingDone){if(this.renderTimer&&(clearTimeout(this.renderTimer),this.renderTimer=null),e){var i=this;this.renderTimer=setTimeout(function(){i.renderLayer(),i.renderTimer=null},e)}else this.renderLayer()}},appendText:function t(e,i){var n,r,s=i[e.fontName],a=document.createElement("div");if(this.textDivs.push(a),isAllWhitespace(e.str)){a.dataset.isWhitespace=!0;return}var o=PDFJS.Util.transform(this.viewport.transform,e.transform),l=Math.atan2(o[1],o[0]);s.vertical&&(l+=Math.PI/2);var d=Math.sqrt(o[2]*o[2]+o[3]*o[3]),h=d;s.ascent?h=s.ascent*h:s.descent&&(h=(1+s.descent)*h),0===l?(n=o[4],r=o[5]-h):(n=o[4]+h*Math.sin(l),r=o[5]-h*Math.cos(l)),a.style.left=n+"px",a.style.top=r+"px",a.style.fontSize=d+"px",a.style.fontFamily=s.fontFamily,a.textContent=e.str,PDFJS.pdfBug&&(a.dataset.fontName=e.fontName),0!==l&&(a.dataset.angle=l*(180/Math.PI)),a.textContent.length>1&&(s.vertical?a.dataset.canvasWidth=e.height*this.viewport.scale:a.dataset.canvasWidth=e.width*this.viewport.scale)},setTextContent:function t(e){this.textContent=e;for(var i=e.items,n=0,r=i.length;n<r;n++)this.appendText(i[n],e.styles);this.divContentDone=!0},convertMatches:function t(e){for(var i=0,n=0,r=this.textContent.items,s=r.length-1,a=null===this.findController?0:this.findController.state.query.length,o=[],l=0,d=e.length;l<d;l++){for(var h=e[l];i!==s&&h>=n+r[i].str.length;)n+=r[i].str.length,i++;i===r.length&&console.error("Could not find a matching mapping");var f={begin:{divIdx:i,offset:h-n}};for(h+=a;i!==s&&h>n+r[i].str.length;)n+=r[i].str.length,i++;f.end={divIdx:i,offset:h-n},o.push(f)}return o},renderMatches:function t(e){if(0!==e.length){var i=this.textContent.items,n=this.textDivs,r=null,s=this.pageIdx,a=null!==this.findController&&s===this.findController.selected.pageIdx,o=null===this.findController?-1:this.findController.selected.matchIdx,l=null!==this.findController&&this.findController.state.highlightAll,d={divIdx:-1,offset:void 0},h=o,f=h+1;if(l)h=0,f=e.length;else if(!a)return;for(var c=h;c<f;c++){var v=e[c],u=v.begin,p=v.end,g=a&&c===o?" selected":"";if(this.findController&&this.findController.updateMatchPosition(s,c,n,u.divIdx,p.divIdx),r&&u.divIdx===r.divIdx?y(r.divIdx,r.offset,u.offset):(null!==r&&y(r.divIdx,r.offset,d.offset),$(u)),u.divIdx===p.divIdx)y(u.divIdx,u.offset,p.offset,"highlight"+g);else{y(u.divIdx,u.offset,d.offset,"highlight begin"+g);for(var x=u.divIdx+1,m=p.divIdx;x<m;x++)n[x].className="highlight middle"+g;$(p,"highlight end"+g)}r=p}r&&y(r.divIdx,r.offset,d.offset)}function $(t,e){var i=t.divIdx;n[i].textContent="",y(i,0,t.offset,e)}function y(t,e,r,s){var a=n[t],o=i[t].str.substring(e,r),l=document.createTextNode(o);if(s){var d=document.createElement("span");d.className=s,d.appendChild(l),a.appendChild(d);return}a.appendChild(l)}},updateMatches:function t(){if(this.renderingDone){for(var e=this.matches,i=this.textDivs,n=this.textContent.items,r=-1,s=0,a=e.length;s<a;s++){for(var o=e[s],l=Math.max(r,o.begin.divIdx),d=l,h=o.end.divIdx;d<=h;d++){var f=i[d];f.textContent=n[d].str,f.className=""}r=o.end.divIdx+1}null!==this.findController&&this.findController.active&&(this.matches=this.convertMatches(null===this.findController?[]:this.findController.pageMatches[this.pageIdx]||[]),this.renderMatches(this.matches))}}},e}();function DefaultTextLayerFactory(){}DefaultTextLayerFactory.prototype={createTextLayerBuilder:function(t,e,i){return new TextLayerBuilder({textLayerDiv:t,pageIndex:e,viewport:i})}};
 
 PDFJS.verbosity = 0;
 PDFJS.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/1.1.114/pdf.worker.min.js";
