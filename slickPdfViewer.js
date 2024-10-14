@@ -148,11 +148,11 @@ class SlickPdfView {
 		if(!styleExists){
 			var styleEle = `<style id="sp-viewer-styles">
 	        	html.sp-main-html,body.sp-main-body {position:relative; height:100%; padding:0px; margin:0px; overflow:hidden !important; font-family:sans-serif;}
+	        	.sp-viewer * {font-family:sans-serif}
 	        	.sp-main-html *, .sp-main-body *, .sp-viewer * {padding:0; margin:0;}
 				.sp-viewer .sp-titlebar {position:absolute; z-index:2; top:0px; left:0px; height:32px; width:100%; overflow:hidden; -webkit-box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); -moz-box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); box-shadow:0px 1px 3px rgba(50, 50, 50, 0.75); background-image:linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-webkit-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-moz-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-ms-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); background-image:-o-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99)); display:flex; justify-content:space-between;align-items: center;}
 				.sp-viewer .sp-document-name {margin-right:10px; margin-left:10px; color:#F2F2F2; line-height:1; font-family:sans-serif; display:inline-block; font-size:14px; flex-shrink: 2; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;}
-				.sp-viewer .sp-titlebar-center {display:flex; flex-shrink: 0; overflow: hidden; white-space: nowrap; min-width: 215px; align-items: center;}
-				
+				.sp-viewer .sp-titlebar-center {display:flex; flex-shrink: 0; overflow: hidden; white-space: nowrap; min-width: 215px; align-items: center;}				
 				.sp-viewer .sp-titlebar-right {flex-shrink: 0; width: 100px;}
 				.sp-viewer .sp-titlebar-right>* {float:left;}
 				.sp-viewer .toolbarButton > svg {width:16px; height:16px; color:#b1b1b1}
@@ -192,10 +192,12 @@ class SlickPdfView {
 				.sp-viewer .sp-canvas {box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -webkit-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -moz-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -ms-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -o-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); overflow:hidden;}
 				.sp-viewer .sp-page-number-input {max-width:20px;}
 				.sp-viewer .sp-scale-select-container {width:68px;}
-				.sp-viewer .sp-thumbnail-wrap {margin-bottom: 10px; margin-top:10px; cursor:pointer}
-				.sp-viewer .sp-thumbnail-wrap:hover canvas {box-shadow: 0 0 15px rgba(0,0,0,0.7)}
-				.sp-viewer .sp-thumbnail-label {text-align:center; padding:0 8px 8px; color:#b1b1b1}
+				.sp-viewer .sp-thumbnail-wrap {margin-bottom: 10px; margin-top:10px; cursor:pointer;}
+				.sp-viewer .sp-thumbnail-wrap:hover canvas, .sp-viewer .sp-thumbnail-wrap.active canvas {box-shadow: 0 0 15px rgba(0,0,0,0.7)}
+				.sp-viewer .sp-thumbnail-wrap.active canvas {outline: 3px solid #5ca8f8c9;}
+				.sp-viewer .sp-thumbnail-label {text-align:center; padding:0 8px 8px; color:#b1b1b1; font-size:12px}
 				.sp-viewer .sp-thumbnail-toggle {margin-left:10px;}
+				.sp-viewer .sp-scale-select {outline:none !important;}
 				@media(max-width: 600px) {
 				    .sp-viewer .sp-document-name {display:none;}
 				    .sp-viewer .sp-thumbnail-container.open {left:-150px !important;}
@@ -738,7 +740,8 @@ class SlickPDFViewerPlugin {
         var pageContainerEle 		= document.createElement("div");
         pageContainerEle.id 		= "pageContainer"+pageIndex+"-"+this.viewer.settings.uniqueId;
         pageContainerEle.className 	= "sp-page";
-        
+        pageContainerEle.setAttribute('data-sp-page-index', pageIndex);
+
         var pageCanvas				= document.createElement("canvas");
         pageCanvas.id 				= "canvas" +pageIndex+"-"+this.viewer.settings.uniqueId;
         pageCanvas.className 		= "sp-canvas";
@@ -750,7 +753,7 @@ class SlickPDFViewerPlugin {
         var thumbnailDiv = document.createElement('div');
         thumbnailDiv.id = "thumbnailwrap"+pageIndex+"-"+this.viewer.settings.uniqueId;
         thumbnailDiv.className = "sp-thumbnail-wrap";
-        //thumbnailDiv.innerHTML = '<div class="sp-thumbnail-label" style="text-align:center; padding:8px; color:#b1b1b1">'+pageIndex+'</div>';
+        thumbnailDiv.setAttribute('data-sp-page-index', pageIndex);
 
         var thumbnailCanvas = document.createElement('canvas');
         thumbnailCanvas.width = 100;
@@ -849,12 +852,19 @@ class SlickPDFViewerPlugin {
     }
 
 	checkPageInView(pageContainerEle){
+		//console.log(pageContainerEle.getAttribute('data-sp-page-index'));
 		if(pageContainerEle.style.display === 'none') return false;
         var canvasContainerScrollTop 	= this.viewer.elements.canvasContainer.scrollTop;
         var canvasContainerHeight 		= canvasContainerScrollTop+this.viewer.elements.canvasContainer.clientHeight;
         var pageContainerOffsetTop 		= pageContainerEle.offsetTop;
         var pageContainerHeight 		= pageContainerOffsetTop + pageContainerEle.clientHeight;
-        return pageContainerOffsetTop >= canvasContainerScrollTop && pageContainerOffsetTop < canvasContainerHeight || pageContainerHeight >= canvasContainerScrollTop && pageContainerHeight < canvasContainerHeight || pageContainerOffsetTop < canvasContainerScrollTop && pageContainerHeight >= canvasContainerHeight;
+        var res = pageContainerOffsetTop >= canvasContainerScrollTop && pageContainerOffsetTop < canvasContainerHeight || pageContainerHeight >= canvasContainerScrollTop && pageContainerHeight < canvasContainerHeight || pageContainerOffsetTop < canvasContainerScrollTop && pageContainerHeight >= canvasContainerHeight;
+        if(res){
+        	var thumbnailWrapper = this.viewer.elements.thumbnailContainer.querySelector('.sp-thumbnail-wrap[data-sp-page-index="'+pageContainerEle.getAttribute('data-sp-page-index')+'"]');
+        	this.viewer.elements.thumbnailContainer.querySelectorAll('.sp-thumbnail-wrap').forEach((el, i) => el.classList.remove('active'));
+        	thumbnailWrapper.classList.add('active');
+        }
+        return res;
 	};
 
     getPageInView() {
