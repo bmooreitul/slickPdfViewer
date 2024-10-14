@@ -100,7 +100,8 @@ Here are the default options when instantiating the SlickPdfView class.
   paddingY   : 40,
   minScale   : 0.25,
   maxScale   : 4,
-  uniqueId   : null
+  uniqueId   : null,
+  thumbnails : false
 }
 ```
 
@@ -114,6 +115,7 @@ Here are the default options when instantiating the SlickPdfView class.
 | minScale | *Optional* numeric value to limit zooming out. For example `0.25` for 25% `0.5` for 50% etc |
 | maxScale | *Optional* numeric value to limit zooming in. For example `1.25` for 125% `4` for 400% etc |
 | uniqueId | *Optional* value to use as a unique id for the rendered viewer to support multiple viewers on the same page.<br><br> *This is set automatically if not provided* |
+| thumbnails | *Optional* value to display thumbnail sidebar. *This value is automatically set from local storage if the user has toggled this option previously* |
 
 
 
