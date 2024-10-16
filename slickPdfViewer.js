@@ -266,7 +266,7 @@ class SlickPdfView {
 				@media screen, print, handheld, projection {
 				    .sp-viewer .sp-page {margin:7px auto 7px auto; position:relative; overflow:hidden; background-clip:content-box; background-color:white; box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -webkit-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -moz-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -ms-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -o-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75);}
 				    .sp-viewer .sp-textLayer {position:absolute; left:0; top:0; right:0; bottom:0; color:#000; font-family:sans-serif; overflow:hidden;}
-				    .sp-viewer .sp-textLayer>div {color:transparent; position:absolute; line-height:1; white-space:pre; cursor:text;}
+				    .sp-viewer .sp-textLayer>div {color:transparent !important; position:absolute; line-height:1; /*white-space:pre;*/ cursor:text;}
 				    .sp-viewer ::selection {background:rgba(0, 0, 255, 0.3);}
 				    .sp-viewer ::-moz-selection {background:rgba(0, 0, 255, 0.3);}
 				}
@@ -744,15 +744,17 @@ class SlickPDFViewerPlugin {
         var pageCanvas 					= pageContainerEle.getElementsByTagName("canvas")[0];
         var pageEle						= pageContainerEle.getElementsByTagName("div")[0];
 
+        var defaultViewport = transportWrapper.getViewport(1);
+
         //SET ELEMENT ATTRIBUTES
         pageContainerEle.style.width 	= width+"px";
         pageContainerEle.style.height 	= height+"px";
         pageCanvas.width 				= width;
         pageCanvas.height 				= height;
-        pageEle.style.width 			= width+"px";
-        pageEle.style.height 			= height+"px";
-        pageEle.style.transform = "scale("+this.viewportZoom+","+this.viewportZoom+")";
-        pageEle.style.transformOrigin = "0% 0%";
+        pageEle.style.width 			= defaultViewport.width+"px";
+        pageEle.style.height 			= defaultViewport.height+"px";
+        pageEle.style.transform 		= "scale("+this.viewportZoom+","+this.viewportZoom+")";
+        pageEle.style.transformOrigin 	= "0% 0%";
         
         //SET THE TRANSPORT WRAPPER STATUS
         this.transportWrapperStatus[transportWrapper.pageIndex] = this.transportWrapperStatus[transportWrapper.pageIndex] === this.statusTypes.RUNNING ? this.statusTypes.RUNNINGOUTDATED : this.statusTypes.BLANK
