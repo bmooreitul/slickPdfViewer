@@ -18,7 +18,7 @@ You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewe
 
 
 ## What it looks like
-![screenshot](examples/example2.png)
+![screenshot](examples/example.png)
 
 # Usage
 
@@ -97,7 +97,7 @@ Here are the default options when instantiating the SlickPdfView class.
   fileUrl    : null,
   zoom       : 'auto',
   startpage  : 1,
-  paddingY   : 40,
+  padding    : 40,
   minScale   : 0.25,
   maxScale   : 4,
   uniqueId   : null,
@@ -111,7 +111,7 @@ Here are the default options when instantiating the SlickPdfView class.
 | fileUrl | The location of the pdf. This can be a full url or a relative path. |
 | zoom | *Optional* value to scale the rendered pdf when loaded.<br><br>**Accepted Values:**<br> - `auto` Automatically Scale the pdf to fit in the viewport<br> - `page-width` Scale the pdf to with the width of the viewport<br> - `page-height` Scale the pdf to fit the height of the viewport<br> - A numeric value like `90` for 90%, `150` for 150% etc. |
 | startpage | *Optional* numeric value to specify which page is initially displayed |
-| paddingY | *Optional* numeric value for how much space to add to the inside of the viewer |
+| padding | *Optional* numeric value for how much space to add to the inside of the viewer |
 | minScale | *Optional* numeric value to limit zooming out. For example `0.25` for 25% `0.5` for 50% etc |
 | maxScale | *Optional* numeric value to limit zooming in. For example `1.25` for 125% `4` for 400% etc |
 | uniqueId | *Optional* value to use as a unique id for the rendered viewer to support multiple viewers on the same page.<br><br> *This is set automatically if not provided* |
