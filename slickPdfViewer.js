@@ -8,7 +8,7 @@ class SlickPdfView {
 		fileUrl 	: null,
 		zoom 		: 'auto',
 		startpage 	: 1,
-		paddingY 	: 40,
+		padding 	: 40,
 		minScale 	: 0.25,
 		maxScale 	: 4,
 		wrapper 	: 'body',
@@ -661,8 +661,8 @@ class SlickPdfViewer {
         var currentScale;
         if (currentScale = "custom" === targetScale ? parseFloat(this.elements.customScaleOption.textContent) / 100 : parseFloat(targetScale)) this.changeScale(currentScale, true);
         else {
-            var width = this.elements.canvasContainer.clientWidth - this.settings.paddingY;
-            var height = this.elements.canvasContainer.clientHeight - this.settings.paddingY;
+            var width = this.elements.canvasContainer.clientWidth - this.settings.padding;
+            var height = this.elements.canvasContainer.clientHeight - this.settings.padding;
             switch (targetScale) {
                 case "page-actual":
                     this.changeScale(1, shouldReset);
