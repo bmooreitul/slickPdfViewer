@@ -4,16 +4,17 @@ function slickPdfIframed(wrapperSelector, settings){ return SlickPdfView.iframed
 class SlickPdfView {
 
 	settings = {
-		fileName 	: null,
-		fileUrl 	: null,
-		zoom 		: 'auto',
-		startpage 	: 1,
-		padding 	: 40,
-		minScale 	: 0.25,
-		maxScale 	: 4,
-		wrapper 	: 'body',
-		uniqueId 	: null,
-		thumbnails 	: false,
+		fileName 		: null,
+		fileUrl 		: null,
+		zoom 			: 'auto',
+		startpage 		: 1,
+		padding 		: 40,
+		minScale 		: 0.25,
+		maxScale 		: 4,
+		wrapper 		: 'body',
+		uniqueId 		: null,
+		thumbnails 		: false,
+		scrollBehavior 	: 'smooth',
 	};
 	requestedOptions 	= {};
 	viewer 				= null;
@@ -266,16 +267,19 @@ class SlickPdfView {
 				@media screen, print, handheld, projection {
 				    .sp-viewer .sp-page {margin:7px auto 7px auto; position:relative; overflow:hidden; background-clip:content-box; background-color:white; box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -webkit-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -moz-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -ms-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75); -o-box-shadow:0px 0px 7px rgba(0, 0, 0, 0.75);}
 				    .sp-viewer .sp-textLayer {position:absolute; left:0; top:0; right:0; bottom:0; color:#000; font-family:sans-serif; overflow:hidden;}
-				    .sp-viewer .sp-textLayer>div {color:transparent !important; position:absolute; line-height:1; /*white-space:pre;*/ cursor:text;}
+				    .sp-viewer .sp-textLayer>div {color:transparent; text-align:left; position:absolute; line-height:normal; white-space:nowrap; cursor:text;}
 				    .sp-viewer ::selection {background:rgba(0, 0, 255, 0.3);}
 				    .sp-viewer ::-moz-selection {background:rgba(0, 0, 255, 0.3);}
 				}
 				@media only screen and (max-device-width: 800px) and (max-device-height: 800px){
-				    .sp-viewer .sp-canvas-container {top:0; bottom:0;}
+				    .sp-viewer .sp-canvas-container {top:0; bottom:0; left:0 !important;}
 				    .sp-viewer .sp-titlebar {background-color:rgba(0, 0, 0, 0.75); background-image:none; -webkit-transition:all 0.5s; -moz-transition:all 0.5s; transition:all 0.5s;}
-				    .sp-viewer .sp-titlebar {top:-32px;}
+				    .sp-viewer .sp-titlebar {top:-56px;}
+				    .sp-viewer .sp-titlebar .sp-titlebar-left {display:none;}
+				    .sp-viewer .sp-nav-buttons, .sp-viewer .sp-number-pages-label, .sp-viewer .sp-page-number-input, .sp-viewer .sp-page-label {display:none;}
+				    .sp-viewer .sp-thumbnail-container {display:none;}
 				    .sp-viewer .sp-titlebar.viewer-touched {top:0px;}
-				    .sp-viewer .viewer-touched {display:block; opacity:1 !important;}
+				    .sp-viewer .viewer-touched {opacity:1 !important;}
 				    .sp-viewer .sp-previous-button, .sp-viewer .sp-next-button {display:none;}
 				}
 	        </style>`;
@@ -493,6 +497,7 @@ class SlickPdfViewer {
     	this.listenFor("next", this.showNextPage);
     	this.elements.thumbnailToggle.addEventListener('click', function(){ that.toggleThumbnailDisplay() });
     	this.elements.pageNumber.addEventListener("change", function() { that.showPage(this.value) });
+    	this.elements.pageNumber.addEventListener("blur", function(e) { setTimeout(function(){ that.showPage(Number(e.target.value)) }, 1); });
     	this.elements.scaleSelect.addEventListener("change", function() { that.checkZoomScale(this.value) });
         this.elements.canvasContainer.addEventListener("click", function(){ that.toggleViewerTouched()});
         this.elements.titleBar.addEventListener("click", function(){ that.addViewerTouched() });
@@ -501,31 +506,48 @@ class SlickPdfViewer {
     	window.addEventListener("resize", function(){
             that.pluginLoaded && (that.elements.pageWidthOption.selected || that.elements.pageAutoOption.selected) && that.checkZoomScale(that.elements.scaleSelect.value);
         });
-        window.addEventListener("keydown", function(event) {
-            switch(event.keyCode){
-                case 8:
-                case 33:
-                case 37:
-                case 38:
-                case 80:
-                    that.showPreviousPage();
-                    break;
-                case 13:
-                case 34:
-                case 39:
-                case 40:
-                case 78:
-                    that.showNextPage();
-                    break;
-                case 32:
-                    event.shiftKey ? that.showPreviousPage() : that.showNextPage();
-                    break;
-                case 36:
-                    that.showPage(1);
-                    break;
-                case 35:
-                    that.showPage(that.pages.length);
-            }
+        this.elements.viewer.addEventListener("keydown", function(event) {
+        	var checkCode = true;
+        	if(that.elements.pageNumber === document.activeElement){
+        		switch(event.code){
+        			case 'Backspace':
+        			case 'ArrowLeft':
+        			case 'ArrowRight':
+        			case 'Enter':
+        				checkCode = false;
+        				break;
+        		}
+
+        		if(event.code == 'Enter') that.elements.pageNumber.blur();
+        	}
+
+        	if(checkCode){
+        		switch(event.code){
+	                case 'Backspace':
+	                case 'PageUp':
+	                case 'ArrowLeft':
+	                case 'ArrowUp':
+	                //case 80:
+	                    that.showPreviousPage();
+	                    break;
+	                case 'Enter': //ENTER
+	                case 'PageDown': //PAGE DOWN
+	                case 'ArrowRight': //ARROW RIGHT
+	                case 'ArrowDown': //ARROW DOWN
+	                //case 78: //
+	                	that.showNextPage();
+	                    break;
+	                case ' ':
+	                    event.shiftKey ? that.showPreviousPage() : that.showNextPage();
+	                    break;
+	                case 'Home':
+	                    that.showPage(1);
+	                    break;
+	                case 'End':
+	                    that.showPage(that.pages.length);
+	            }
+        	}
+
     	});
         
         this.plugin.initialize((plugin) => {
@@ -743,8 +765,7 @@ class SlickPDFViewerPlugin {
         var pageContainerEle 			= this.pages[transportWrapper.pageIndex];
         var pageCanvas 					= pageContainerEle.getElementsByTagName("canvas")[0];
         var pageEle						= pageContainerEle.getElementsByTagName("div")[0];
-
-        var defaultViewport = transportWrapper.getViewport(1);
+        var defaultViewport 			= transportWrapper.getViewport(1);
 
         //SET ELEMENT ATTRIBUTES
         pageContainerEle.style.width 	= width+"px";
@@ -753,7 +774,7 @@ class SlickPDFViewerPlugin {
         pageCanvas.height 				= height;
         pageEle.style.width 			= defaultViewport.width+"px";
         pageEle.style.height 			= defaultViewport.height+"px";
-        pageEle.style.transform 		= "scale("+this.viewportZoom+","+this.viewportZoom+")";
+        pageEle.style.transform 		= "scale("+this.viewportZoom+")";
         pageEle.style.transformOrigin 	= "0% 0%";
         
         //SET THE TRANSPORT WRAPPER STATUS
@@ -953,7 +974,7 @@ class SlickPDFViewerPlugin {
 
 	//SCROLL TO A PAGE BY PAGE NUMBER
     showPage(pageNumber){
-    	this.pages[pageNumber-1].scrollIntoView({behavior:"smooth",block:"center"});
+    	this.pages[pageNumber-1].scrollIntoView({behavior: this.viewerWrapper.settings.scrollBehavior ,block:"center"});
     }
 };
 
