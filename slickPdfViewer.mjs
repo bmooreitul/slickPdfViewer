@@ -13552,6 +13552,7 @@ const PDFViewerApplication = {
   },
   setTitle(title = this._title) {
     this._title = title;
+    document.getElementById('viewer-title').innerHTML = title;
     if (this.isViewerEmbedded) {
       return;
     }
