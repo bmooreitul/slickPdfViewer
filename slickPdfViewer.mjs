@@ -1,4 +1,4 @@
-import '//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.mjs';
+import {} '//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.mjs';
 
 /******/ // The require scope
 /******/ var __webpack_require__ = {};
@@ -15498,13 +15498,6 @@ var html = `
                 <button id="zoomInButton" class="toolbarButton" type="button" title="Zoom In" tabindex="0" data-l10n-id="pdfjs-zoom-in-button">
                     <span data-l10n-id="pdfjs-zoom-in-button-label">Zoom In</span>
                   </button>
-
-                  <!--
-                  <div class="verticalToolbarSeparator" style="border-left:80%;" >&nbsp;</div>
-                  <button class="toolbarButton" type="button" title="Next Page" id="next" tabindex="0" data-l10n-id="pdfjs-next-button">
-                    <span data-l10n-id="pdfjs-next-button-label">Next</span>
-                  </button>
-                  -->
               </div>
 
 
@@ -15967,7 +15960,7 @@ var html = `
 //const queryString = document.location.search.substring(1);
 //const params = parseQueryString(queryString);
 
-
+/*
 document.blockUnblockOnload?.(true);
 if (document.readyState === "interactive" || document.readyState === "complete") {
   //webViewerLoad();
@@ -15977,6 +15970,7 @@ if (document.readyState === "interactive" || document.readyState === "complete")
 } else {
   //document.addEventListener("DOMContentLoaded", webViewerLoad, true);
 }
+*/
 
 var __webpack_exports__slickPdfView = window.slickPdfView;
 var __webpack_exports__PDFViewerApplication = __webpack_exports__.PDFViewerApplication;
