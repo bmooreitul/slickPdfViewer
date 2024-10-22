@@ -44,7 +44,7 @@ const MIN_SCALE = 0.25;
 const MAX_SCALE = 4.0;
 const UNKNOWN_SCALE = 0;
 const MAX_AUTO_SCALE = 1;
-const SCROLLBAR_PADDING = 40;
+const SCROLLBAR_PADDIN = 40;
 const VERTICAL_PADDING = 40;
 const RenderingStates = {
   INITIAL: 0,
@@ -719,7 +719,7 @@ const defaultOptions = {
     kind: OptionKind.VIEWER
   },
   sidebarViewOnLoad: {
-    value: -1,
+    value: 1,
     kind: OptionKind.VIEWER + OptionKind.PREFERENCE
   },
   scrollModeOnLoad: {
@@ -735,7 +735,7 @@ const defaultOptions = {
     kind: OptionKind.VIEWER + OptionKind.PREFERENCE
   },
   viewOnLoad: {
-    value: 0,
+    value: 1,
     kind: OptionKind.VIEWER + OptionKind.PREFERENCE
   },
   cMapPacked: {
@@ -11610,8 +11610,8 @@ class PDFViewer {
       if (!currentPage) {
         return;
       }
-      let hPadding = SCROLLBAR_PADDING,
-        vPadding = VERTICAL_PADDING;
+      let hPadding = slickPdfViewDefaults.padding,
+        vPadding = slickPdfViewDefaults.padding;
       if (this.isInPresentationMode) {
         hPadding = vPadding = 4;
         if (this._spreadMode !== SpreadMode.NONE) {
@@ -11731,8 +11731,8 @@ class PDFViewer {
         y = destArray[3];
         width = destArray[4] - x;
         height = destArray[5] - y;
-        let hPadding = SCROLLBAR_PADDING,
-          vPadding = VERTICAL_PADDING;
+        let hPadding = slickPdfViewDefaults.padding,
+          vPadding = slickPdfViewDefaults.padding;
         if (this.removePageBorders) {
           hPadding = vPadding = 0;
         }
@@ -12242,7 +12242,7 @@ class PDFViewer {
         newScale = round((newScale * delta).toFixed(2) * 10) / 10;
       } while (--steps > 0);
     }
-    newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+    newScale = Math.max(slickPdfViewDefaults.minScale, Math.min(slickPdfViewDefaults.maxScale, newScale));
     this.#setScale(newScale, {
       noScroll: false,
       drawingDelay,
@@ -12953,8 +12953,8 @@ class Toolbar {
     }
     opts.previous.disabled = pageNumber <= 1;
     opts.next.disabled = pageNumber >= pagesCount;
-    opts.zoomOut.disabled = pageScale <= MIN_SCALE;
-    opts.zoomIn.disabled = pageScale >= MAX_SCALE;
+    opts.zoomOut.disabled = pageScale <= slickPdfViewDefaults.minScale;
+    opts.zoomIn.disabled = pageScale >= slickPdfViewDefaults.maxScale;
     let predefinedValueFound = false;
     for (const option of opts.scaleSelect.options) {
       if (option.value !== pageScaleValue) {
@@ -13020,6 +13020,7 @@ class ViewHistory {
     return localStorage.getItem("pdfjs.history");
   }
   async set(name, val) {
+  	//console.log('setting localstorage', name, val);
     await this._initializedPromise;
     this.file[name] = val;
     return this._writeToStorage();
@@ -13156,6 +13157,8 @@ const PDFViewerApplication = {
       await this._parseHashParams();
     }
     let mode;
+    mode = "is-dark";
+    /*
     switch (AppOptions.get("viewerCssTheme")) {
       case 1:
         mode = "is-light";
@@ -13164,6 +13167,7 @@ const PDFViewerApplication = {
         mode = "is-dark";
         break;
     }
+    */
     if (mode) {
       document.documentElement.classList.add(mode);
     }
@@ -13452,6 +13456,7 @@ const PDFViewerApplication = {
 
     const queryString = document.location.search.substring(1);
     const params = parseQueryString(queryString);
+    //console.log(params);
     file = params.get("file") ?? AppOptions.get("defaultUrl");
     validateFileURL(file);
     const fileInput = this._openFileInput = document.createElement("input");
@@ -13832,12 +13837,12 @@ const PDFViewerApplication = {
     } = pdfViewer;
     this.pdfThumbnailViewer?.setDocument(pdfDocument);
     const storedPromise = (this.store = new ViewHistory(pdfDocument.fingerprints[0])).getMultiple({
-      page: null,
-      zoom: DEFAULT_SCALE_VALUE,
+      page: slickPdfViewDefaults.startpage,
+      zoom: slickPdfViewDefaults.zoom,
       scrollLeft: "0",
       scrollTop: "0",
       rotation: null,
-      sidebarView: SidebarView.UNKNOWN,
+      sidebarView: slickPdfViewDefaults.thumbnails === true ? 1 : 0,
       scrollMode: ScrollMode.UNKNOWN,
       spreadMode: SpreadMode.UNKNOWN
     }).catch(() => {});
@@ -13853,11 +13858,21 @@ const PDFViewerApplication = {
         });
         const initialBookmark = this.initialBookmark;
         const zoom = AppOptions.get("defaultZoomValue");
+
         let hash = zoom ? `zoom=${zoom}` : null;
         let rotation = null;
         let sidebarView = AppOptions.get("sidebarViewOnLoad");
         let scrollMode = AppOptions.get("scrollModeOnLoad");
         let spreadMode = AppOptions.get("spreadModeOnLoad");
+        //sidebarView = slickPdfViewDefaults.thumbnails === false ? SidebarView.UNKNOWN : 1;
+        sidebarView = slickPdfViewDefaults.thumbnails === true ? 1 : 0;
+        stored.page = slickPdfViewDefaults.startpage;
+        //console.log(stored);
+        //console.log(slickPdfViewDefaults);
+        //sidebarView = 0;
+        //console.log(AppOptions.getAll());
+        //console.log(SidebarView);
+        //console.log(pageMode);
         if (stored?.page && viewOnLoad !== ViewOnLoad.INITIAL) {
           hash = `page=${stored.page}&zoom=${zoom || stored.zoom},` + `${stored.scrollLeft},${stored.scrollTop}`;
           rotation = parseInt(stored.rotation, 10);
@@ -14114,6 +14129,10 @@ const PDFViewerApplication = {
       resetHistory: viewOnLoad === ViewOnLoad.INITIAL,
       updateUrl: AppOptions.get("historyUpdateUrl")
     });
+
+    //console.log(slickPdfViewDefaults.startpage);
+    //this.page = slickPdfViewDefaults.startpage;
+
     if (this.pdfHistory.initialBookmark) {
       this.initialBookmark = this.pdfHistory.initialBookmark;
       this.initialRotation = this.pdfHistory.initialRotation;
@@ -14177,6 +14196,7 @@ const PDFViewerApplication = {
       setRotation(rotation);
       this.pdfLinkService.setHash(storedHash);
     }
+    this.pdfViewer.currentPageNumber = slickPdfViewDefaults.startpage;
     this.toolbar?.setPageNumber(this.pdfViewer.currentPageNumber, this.pdfViewer.currentPageLabel);
     this.secondaryToolbar?.setPageNumber(this.pdfViewer.currentPageNumber);
     if (!this.pdfViewer.currentScaleValue) {
@@ -15215,6 +15235,7 @@ var slickPdfViewDefaultsConfigMap = {
 function getViewerConfiguration() {
 	document.querySelector(slickPdfViewDefaults.wrapper).style.width = '100%';
 	document.querySelector(slickPdfViewDefaults.wrapper).style.height = '100vh';
+	//ViewHistory.set('sidebarView', slickPdfViewDefaults.thumbnails === true ? 1 : 0);
 	//console.log(slickPdfViewDefaults);
   return {
     appContainer                  	: document.querySelector(slickPdfViewDefaults.wrapper), //document.body,
@@ -15407,6 +15428,9 @@ window.slickPdfView = function(wrapperSelector, options){
 
 	slickPdfViewDefaults.uniqueId = uniqueId;
 	slickPdfViewDefaults = {...slickPdfViewDefaults, ...options};
+	options = slickPdfViewDefaults
+
+	//console.log(slickPdfViewDefaults);
 
   //CHECK IF THE STYLESHEET EXISTS
   var styleExists = !!document.getElementById('sp-viewer-styles');
@@ -16085,14 +16109,20 @@ var html = `
     <div id="printContainer"></div>
     `;
 
+	defaultOptions.sidebarViewOnLoad.value = slickPdfViewDefaults.thumbnails === true ? 1 : 0;
+    PDFViewerApplicationOptions.set('sidebarViewOnLoad', defaultOptions.sidebarViewOnLoad);
+    defaultOptions.defaultZoomValue.value = slickPdfViewDefaults.zoom;
+    PDFViewerApplicationOptions.set('defaultZoomValue', slickPdfViewDefaults.zoom);
+
+    //console.log(defaultOptions);
 
     document.querySelector(wrapperSelector).innerHTML 	+= html;
-    slickPdfViewDefaults.fileName 						= options.fileName;
-    slickPdfViewDefaults.fileUrl 						= options.fileUrl;
-	defaultOptions.defaultFileName.value 				= options.fileName;
- 	PDFViewerApplicationOptions.set('defaultFileName', options.fileName);
- 	slickPdfViewDefaults.wrapper = wrapperSelector;
-	PDFViewerApplicationOptions.set('defaultUrl', options.fileUrl);
+    slickPdfViewDefaults.fileName 						= slickPdfViewDefaults.fileName;
+    slickPdfViewDefaults.fileUrl 						= slickPdfViewDefaults.fileUrl;
+	defaultOptions.defaultFileName.value 				= slickPdfViewDefaults.fileName;
+ 	PDFViewerApplicationOptions.set('defaultFileName', slickPdfViewDefaults.fileName);
+ 	slickPdfViewDefaults.wrapper 						= wrapperSelector;
+	PDFViewerApplicationOptions.set('defaultUrl', slickPdfViewDefaults.fileUrl);
 	PDFViewerApplicationOptions.set('uniqueId', uniqueId);
  	webViewerLoad();
 }
