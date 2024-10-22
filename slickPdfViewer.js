@@ -996,4 +996,4 @@ var CSS_UNITS=96/72,DEFAULT_SCALE="auto",UNKNOWN_SCALE=0,MAX_AUTO_SCALE=1,SCROLL
 PDFJS.verbosity = 0;
 PDFJS.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/1.1.114/pdf.worker.min.js";
 
-export {slickPdfView, slickPdfIframed, SlickPdfView}
+//export {slickPdfView, slickPdfIframed, SlickPdfView}
