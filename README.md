@@ -1,24 +1,23 @@
 # slickPdfViewer
-A pure Javascript PDF reader with no dependencies.
+A pure Javascript PDF reader with no dependencies built with the open source software [PDF.JS](https://mozilla.github.io/pdf.js/) (version 4.7.76)
 
 The original purpose of this package was to resolve cross browser display issues with embedding a pdf in an iframe. 
 Specifically Safari refuses to show any toolbar options when for pdfs embedded in iframes.
 
 ## Features
- :heavy_check_mark: Cross browser support<br>
- :heavy_check_mark: Iframe support<br>
+ :heavy_check_mark: Cross browser<br>
+ :heavy_check_mark: Works with cross domain files (Even when printing a remote pdf from within an embedded iframe)<br>
  :heavy_check_mark: Native Print Dialog<br>
- :heavy_check_mark: Fullscreen Mode<br>
+ :heavy_check_mark: Native Search<br>
+ :heavy_check_mark: Fullscreen/Presentation Mode<br>
  :heavy_check_mark: No dependencies<br>
  :heavy_check_mark: Responsive<br>
 
 ### Demo
-You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewer/1
-
-
+You can see a demo [here](https://jsfiddle.net/bmooreitul/twcn1d0y/)
 
 ## What it looks like
-![screenshot](examples/example.png)
+![screenshot](examples/example-3.png)
 
 # Usage
 
@@ -27,10 +26,8 @@ You can see a demo here https://laraveldocs.itulbuild.com/examples/slickPdfViewe
 The below example will render the viewer as html.
 
 ```html
-<!-- INCLUDE THE PACKAGE FROM CDN -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.js"></script>
-
-<script>
+<script type="module">
+  import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
   slickPdfView('https://example.com/path/to/file.pdf');
 </script>
 ```
@@ -43,10 +40,8 @@ The below example will render the viewer as html contained in a specific element
 <!-- THE ELEMENT THAT WILL CONTAIN THE RENDERED VIEW -->
 <div id="appendToMe"></div>
 
-<!-- INCLUDE THE PACKAGE FROM CDN -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.js"></script>
-
-<script>
+<script type="module">
+  import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
   slickPdfView('#appendToMe', 'https://example.com/path/to/file.pdf');
 </script>
 ```
@@ -56,10 +51,8 @@ The below example will render the viewer as html contained in a specific element
 The below example will render the viewer as html and using additional options.
 
 ```html
-<!-- INCLUDE THE PACKAGE FROM CDN -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.js"></script>
-
-<script>
+<script type="module">
+  import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
   slickPdfView({
     fileName  : 'custom-file-name.pdf', //CUSTOM NAME WHEN DOWNLOADING/PRINTING AND IN THE TITLE BAR
     fileUrl   : 'https://example.com/path/to/file.pdf', //THE PATH TO THE PDF (CAN BE A FULL URL OR A RELATIVE PATH)
@@ -69,26 +62,10 @@ The below example will render the viewer as html and using additional options.
 </script>
 ```
 
-## Iframed Example
-
-The below example will render the viewer inside of an iframe element.
-
-```html
-<!-- THE ELEMENT THAT WILL CONTAIN THE RENDERED VIEW -->
-<div id="appendToMe"></div>
-
-<!-- INCLUDE THE PACKAGE FROM CDN -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.js"></script>
-
-<script>
-  slickPdfIframed('#appendToMe', 'https://example.com/path/to/file.pdf');
-</script>
-```
-
 # Arguments
 
 ```javascript
-constructor(wrapperSelector, options)
+slickPdfView(wrapperSelector, options)
 ```
 <br>
 
@@ -128,9 +105,7 @@ slickPdfView('#appendToMe', {
   padding        : 60,                  //ADD 60px PADDING TO THE INSIDE OF THE VIEWER
   minScale       : 0.1,                 //LIMIT THE MINIMUM ZOOM TO 10%
   maxScale       : 5,                   //LIMIT THE MAX ZOOM TO 500%
-  uniqueId       : 'abcdefg123456',     //SET A CUSTOM UNIQUE ID FOR THE RENDERED ELEMENTS
   thumbnails     : true,                //DISPLAY THE THUMBNAIL PANEL ON LOAD
-  scrollBehavior : 'instant'            //JUMP BETWEEN PAGES INSTANTLY
 });
 ```
 
@@ -147,9 +122,7 @@ Here are the default options when instantiating the SlickPdfView class.
   padding        : 40,
   minScale       : 0.25,
   maxScale       : 4,
-  uniqueId       : null,
   thumbnails     : false,
-  scrollBehavior : 'smooth'
 }
 ```
 
@@ -162,9 +135,5 @@ Here are the default options when instantiating the SlickPdfView class.
 | padding | *Optional* numeric value for how much space to add to the inside of the viewer |
 | minScale | *Optional* numeric value to limit zooming out. For example `0.25` for 25% `0.5` for 50% etc |
 | maxScale | *Optional* numeric value to limit zooming in. For example `1.25` for 125% `4` for 400% etc |
-| uniqueId | *Optional* value to use as a unique id for the rendered viewer to support multiple viewers on the same page.<br><br> *This is set automatically if not provided* |
 | thumbnails | *Optional* value to display thumbnail sidebar.<br> *This value is automatically set from local storage if the user has toggled this option previously* |
-| scrollBehavior | *Optional* value to control how the viewer jumps between pages. <br><br>**Accepted Values:**<br> - `smooth` Smoothly animate scrolling to a new page <br> - `instant` Instantly jump to the new page <br> - `auto` Use the system scroll behavior.<br><br> *For more information see* https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView#behavior |
-
-
 
