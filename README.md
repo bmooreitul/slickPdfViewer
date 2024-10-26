@@ -1,23 +1,56 @@
 # slickPdfViewer
-A pure Javascript PDF reader with no dependencies built with the open source software [PDF.JS](https://mozilla.github.io/pdf.js/) (version 4.7.76)
+This is a pure/vanilla Javascript PDF viewer with ***no dependencies*** based on open source software [PDF.JS](https://mozilla.github.io/pdf.js/) (4.7.76)<br>
 
-The original purpose of this package was to resolve cross browser display issues with embedding a pdf in an iframe. 
-Specifically Safari refuses to show any toolbar options when for pdfs embedded in iframes.
+Since all browsers handle an embedded PDF differently, the goal is to seamlessly emulate Chrome's native PDF viewer accross all browsers/platforms.
+
+### You can see a demo [here](https://jsfiddle.net/bmooreitul/twcn1d0y/)
+
+## In a Nutshell
+
+Most of the time you will only need to use a couple lines of code to render the viewer
+
+:scream: *You dont even need to download or install anything to use the examples below. It can work entirely from the CDN*
+
+```html
+<!-- Real code that can be copy and pasted into any website. Super Simple -->
+<script type="module">
+  import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
+  slickPdfView('//pdfobject.com/pdf/sample.pdf');
+</script>
+```
 
 ## Features
- :heavy_check_mark: Cross browser<br>
+ :heavy_check_mark: Works on Mac/PC for all 4 major browsers (Chrome/Firefox/Safari/Edge)<br>
+ :heavy_check_mark: CORS download/print with or without embedding in an iframe.<br>
  :heavy_check_mark: Works with cross domain files (Even when printing a remote pdf from within an embedded iframe)<br>
  :heavy_check_mark: Native Print Dialog<br>
  :heavy_check_mark: Native Search<br>
  :heavy_check_mark: Fullscreen/Presentation Mode<br>
  :heavy_check_mark: No dependencies<br>
  :heavy_check_mark: Responsive<br>
+ :x: Netscape/Juno/AOL/Explorer. Not catering to 30 year old "requirements" or other equally ridiculous cases<br>
 
-### Demo
-You can see a demo [here](https://jsfiddle.net/bmooreitul/twcn1d0y/)
+### All Features Confirmed working in these browsers:
+:heavy_check_mark: Chrome Version 130.0.6723.58 (Mac)<br>
+:heavy_check_mark: Firefox 131.0.2 (Mac)<br>
+:heavy_check_mark: Safari 17.6 (Mac)<br>
+:heavy_check_mark: Edge Version 129.0.2792.89 (Windows)<br>
+:heavy_check_mark: Chrome Version 130.0.6723.70 (Windows)<br>
+:heavy_check_mark: Firefox 131.0.3 (Windows)<br>
 
 ## What it looks like
 ![screenshot](examples/example-3.png)
+
+The Only Code Used to render the above screenshot is:
+```html
+<script type="module">
+    import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
+    slickPdfView({
+        fileUrl    : '//pdfobject.com/pdf/sample.pdf',
+        thumbnails : true
+    });
+</script>
+```
 
 # Usage
 
@@ -137,3 +170,9 @@ Here are the default options when instantiating the SlickPdfView class.
 | maxScale | *Optional* numeric value to limit zooming in. For example `1.25` for 125% `4` for 400% etc |
 | thumbnails | *Optional* value to display thumbnail sidebar.<br> *This value is automatically set from local storage if the user has toggled this option previously* |
 
+## Untested browsers:
+- Opera (Mac)
+- Opera (Windows)
+- Safari (Windows)
+- Brave (Windows)
+- Brave (Mac)
