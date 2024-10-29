@@ -3,7 +3,9 @@ This is a pure/vanilla Javascript PDF viewer with ***no dependencies*** based on
 
 Since all browsers handle an embedded PDF differently, the goal is to seamlessly emulate Chrome's native PDF viewer accross all browsers/platforms.
 
-### You can see a demo [here](https://jsfiddle.net/bmooreitul/twcn1d0y/)
+### Demos
+- [Single Page](https://jsfiddle.net/bmooreitul/twcn1d0y/)
+- [Multiple Instances](https://jsfiddle.net/bmooreitul/twcn1d0y/)
 
 ## In a Nutshell
 
@@ -65,6 +67,15 @@ The below example will render the viewer as html.
 </script>
 ```
 
+## Basic Example Without Module
+```html
+<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
+
+<script>
+  slickPdfView('https://example.com/path/to/file.pdf');
+</script>
+```
+
 ## Basic Example Contained
 
 The below example will render the viewer as html contained in a specific element.
@@ -76,6 +87,21 @@ The below example will render the viewer as html contained in a specific element
 <script type="module">
   import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
   slickPdfView('#appendToMe', 'https://example.com/path/to/file.pdf');
+</script>
+```
+
+## Basic Example Multiple Instances on the same page
+
+The below example will render the viewer as html contained in 2 specific elements.
+
+```html
+<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
+
+<div id="append-to-me-1" style="width:500px; height:500px;"></div>
+<div id="append-to-me-2" style="width:500px; height:500px;"></div>
+<script>
+  slickPdfView('#append-to-me-1','https://example.com/path/to/file.pdf');
+  slickPdfView('#append-to-me-2','https://example.com/path/to/file.pdf');
 </script>
 ```
 
@@ -155,7 +181,7 @@ Here are the default options when instantiating the SlickPdfView class.
   padding        : 40,
   minScale       : 0.25,
   maxScale       : 4,
-  thumbnails     : false,
+  thumbnails     : null,
 }
 ```
 
