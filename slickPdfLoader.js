@@ -1,8 +1,8 @@
-//DEFINE THE LOADER VERSION
-var slickPdfLoaderVersion   = '2.0.1';
-
 //DEFINE THE VIEWERS
 window.slickPdfViewers = {};
+
+//const slickPdfModulePath = '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
+const slickPdfModulePath = document.currentScript.src.replace('slickPdfLoader.js', 'slickPdfViewer.min.mjs').replace('slickPdfLoader.min.js', 'slickPdfViewer.min.mjs');
 
 //LOAD A VIEWER
 async function slickPdfLoader(wrapperSelector, settings){
@@ -25,16 +25,20 @@ async function slickPdfLoader(wrapperSelector, settings){
     //IF NO SETTINGS WERE PASSED THEN INIT AN EMPTY OBJECT
     if(typeof settings !== 'object') settings = {};
 
-    //ALLOW EXPLICIT DEFINITION OF MODULE LOCATION
-    var slickPdfViewerCDN = typeof settings.moduleUrl != 'undefined' ? settings.moduleUrl : ('//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer@'+(typeof settings.moduleVersion != 'undefined' ? settings.moduleVersion : slickPdfLoaderVersion)+'/slickPdfViewer.min.mjs');
-
-    //BUILD THE IFRAME
+    //CREATE AN IFRAME ELEMENT
     var iframe          = document.createElement('iframe');
-    var wrapperEle      = document.querySelector(wrapperSelector);
-    var loaded          = false;
-    var viewerInstance  = null;
 
+    //SET THE IFRAME ATTRIBUTES
+    iframe.setAttribute('style', 'width:100%; height:100%; border:0; margin:0; padding:0;display:block;');
+    iframe.classList.add('sp-viewer-iframe');
+
+    //GET THE WRAPPER ELEMENT
+    var wrapperEle      = document.querySelector(wrapperSelector);
+
+    //CHECK IF THE WRAPPER ELEMENT IS BODY
     if(wrapperEle.tagName == 'BODY'){
+
+        //CHECK IF THE BODY ALREADY HAS THE CLASS
         if(!document.body.classList.contains('sp-main-body')){
             document.body.classList.add('sp-main-body');
             document.body.style.margin              = 0;
@@ -49,30 +53,22 @@ async function slickPdfLoader(wrapperSelector, settings){
     //ADD THE IFRAME TO THE WRAPPER ELEMENT
     wrapperEle.appendChild(iframe);
 
-    //SET THE IFRAME ATTRIBUTES
-    iframe.setAttribute('style', 'width:100%; height:100%; border:0; margin:0; padding:0;display:block;');
-    iframe.classList.add('sp-viewer-iframe');
-    //iframe.sandbox = '';
-
-    //BUILD THE IFRAME HTML
-    var html = `<!DOCTYPE html>
+    //SET THE IFRAME CONTENT
+    iframe.contentWindow.document.open();
+    iframe.contentWindow.document.write(`<!DOCTYPE html>
 <html lang="en-US" style="position:relative; height:100%; width:100%;">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title></title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
     </head>
-    <body style="margin:0; padding:0; height:100%; width:100%; overflow:hidden; position:relative;">
+    <body style="margin:0;padding:0;height:100%;width:100%;overflow:hidden;position:relative;">
         <script type="module">
-            import '`+slickPdfViewerCDN+`';
+            import '`+slickPdfModulePath+`';
             slickPdfView('body', `+JSON.stringify(settings)+`);
         </script>
     </body>
-</html>`;
-
-    //SET THE IFRAME CONTENT
-    iframe.contentWindow.document.open();
-    iframe.contentWindow.document.write(html);
+</html>`);
     iframe.contentWindow.document.close();
 
     //WAIT FOR THE IFRAME TO LOAD
@@ -87,12 +83,7 @@ async function slickPdfLoader(wrapperSelector, settings){
         var res = {
             Id              : () => {return config.uniqueId; },
             element         : iframe,
-            settings        : config,
-            viewer          : {
-                application : contentWindow.PDFViewerApplication,
-                constants   : contentWindow.PDFViewerApplicationConstants,
-                options     : contentWindow.PDFViewerApplicationOptions,
-            }
+            options         : config
         };
 
         //ADD THE LOADED VIEWER TO THE LIST OF VIEWERS
