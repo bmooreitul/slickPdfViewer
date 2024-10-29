@@ -5,8 +5,9 @@ Since all browsers handle an embedded PDF differently, the goal is to seamlessly
 
 ### Demos
 - [Single Page](https://jsfiddle.net/bmooreitul/twcn1d0y/)
-- [Multiple Instances](https://jsfiddle.net/bmooreitul/twcn1d0y/)
+- [Multiple Instances](https://jsfiddle.net/bmooreitul/r57wj9mf/)
 
+  
 ## In a Nutshell
 
 Most of the time you will only need to use a couple lines of code to render the viewer
@@ -56,6 +57,13 @@ The Only Code Used to render the above screenshot is:
 
 # Usage
 
+There are 2 flavors of slickPdf.<br>
+The first is using it as a module, which requires the code to be wrapped in `<script type="module">` and to `import` the module from the CDN or your local path.<br><br>
+The second way is to use `<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>` somewhere in the page (usually the header). Then call `slickPdfLoader(...)`<br><br>
+
+The first way is better for applications that don't intend on displaying multiple instances on the same page.<br>
+The second way is better for multiple instances.<br><br>
+
 ## Basic Example
 
 The below example will render the viewer as html.
@@ -72,7 +80,7 @@ The below example will render the viewer as html.
 <script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
 
 <script>
-  slickPdfView('https://example.com/path/to/file.pdf');
+  slickPdfLoader('https://example.com/path/to/file.pdf');
 </script>
 ```
 
@@ -100,8 +108,8 @@ The below example will render the viewer as html contained in 2 specific element
 <div id="append-to-me-1" style="width:500px; height:500px;"></div>
 <div id="append-to-me-2" style="width:500px; height:500px;"></div>
 <script>
-  slickPdfView('#append-to-me-1','https://example.com/path/to/file.pdf');
-  slickPdfView('#append-to-me-2','https://example.com/path/to/file.pdf');
+  slickPdfLoader('#append-to-me-1','https://example.com/path/to/file.pdf');
+  slickPdfLoader('#append-to-me-2','https://example.com/path/to/file.pdf');
 </script>
 ```
 
@@ -194,7 +202,7 @@ Here are the default options when instantiating the SlickPdfView class.
 | padding | *Optional* numeric value for how much space to add to the inside of the viewer |
 | minScale | *Optional* numeric value to limit zooming out. For example `0.25` for 25% `0.5` for 50% etc |
 | maxScale | *Optional* numeric value to limit zooming in. For example `1.25` for 125% `4` for 400% etc |
-| thumbnails | *Optional* value to display thumbnail sidebar.<br> *This value is automatically set from local storage if the user has toggled this option previously* |
+| thumbnails | *Optional* value to display thumbnail sidebar. `true` to show, `false` to hide, or `null` <br> *This value is automatically set from local storage if the user has toggled this option previously and this is not provided/is null.* |
 
 ## Untested browsers:
 - Opera (Mac)
