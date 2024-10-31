@@ -3,24 +3,8 @@ This is a pure/vanilla Javascript PDF viewer with ***no dependencies*** based on
 
 Since all browsers handle an embedded PDF differently, the goal is to seamlessly emulate Chrome's native PDF viewer accross all browsers/platforms.
 
-### Demos
-- [Single Page](https://jsfiddle.net/bmooreitul/twcn1d0y/)
-- [Multiple Instances](https://jsfiddle.net/bmooreitul/r57wj9mf/)
+You can see demos here [Single Page](https://jsfiddle.net/bmooreitul/twcn1d0y/) [Multiple Instances](https://jsfiddle.net/bmooreitul/r57wj9mf/)
 
-  
-## In a Nutshell
-
-Most of the time you will only need to use a couple lines of code to render the viewer
-
-:scream: *You dont even need to download or install anything to use the examples below. It can work entirely from the CDN*
-
-```html
-<!-- Real code that can be copy and pasted into any website. Super Simple -->
-<script type="module">
-  import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
-  slickPdfView('//pdfobject.com/pdf/sample.pdf');
-</script>
-```
 
 ## Features
  :heavy_check_mark: Works on Mac/PC for all 4 major browsers (Chrome/Firefox/Safari/Edge)<br>
@@ -33,55 +17,52 @@ Most of the time you will only need to use a couple lines of code to render the 
  :heavy_check_mark: Responsive<br>
  :x: Netscape/Juno/AOL/Explorer. Not catering to 30 year old "requirements" or other equally ridiculous cases<br>
 
-### All Features Confirmed working in these browsers:
+<details>
+  <summary>All Features Confirmed working in these browsers</summary> 
 :heavy_check_mark: Chrome Version 130.0.6723.58 (Mac)<br>
 :heavy_check_mark: Firefox 131.0.2 (Mac)<br>
 :heavy_check_mark: Safari 17.6 (Mac)<br>
 :heavy_check_mark: Edge Version 129.0.2792.89 (Windows)<br>
 :heavy_check_mark: Chrome Version 130.0.6723.70 (Windows)<br>
 :heavy_check_mark: Firefox 131.0.3 (Windows)<br>
+</details>
 
-## What it looks like
-![screenshot](examples/example-3.png)
 
-The Only Code Used to render the above screenshot is:
+## In a Nutshell
+
+Most of the time you will only need to use a couple lines of code to render the viewer
+
+:scream: *You dont even need to download or install anything to use the examples below. It can work entirely from the CDN*
+
 ```html
-<script type="module">
-    import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
-    slickPdfView({
-        fileUrl    : '//pdfobject.com/pdf/sample.pdf',
-        thumbnails : true
-    });
-</script>
+<!-- Real code that can be copy and pasted into any website. Super Simple -->
+<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
+<script>slickPdfView('//pdfobject.com/pdf/sample.pdf')</script>
 ```
+
+
+
 
 # Usage
 
-There are 2 flavors of slickPdf.<br>
-The first is using it as a module, which requires the code to be wrapped in `<script type="module">` and to `import` the module from the CDN or your local path.<br><br>
-The second way is to use `<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>` somewhere in the page (usually the header). Then call `slickPdfLoader(...)`<br><br>
+## Include the package
 
-The first way is better for applications that don't intend on displaying multiple instances on the same page.<br>
-The second way is better for multiple instances.<br><br>
+To begin using slickPdf you will need to inclue the library.
+
+```html
+<!-- FROM CDN -->
+<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
+
+<!-- LOCALLY HOSTED -->
+<script src="/path/to/slickPdfLoader.js"></script>
+```
 
 ## Basic Example
 
-The below example will render the viewer as html.
+The below example will render the viewer as html directly to the body element.
 
-```html
-<script type="module">
-  import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
-  slickPdfView('https://example.com/path/to/file.pdf');
-</script>
-```
-
-## Basic Example Without Module
-```html
-<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
-
-<script>
-  slickPdfLoader('https://example.com/path/to/file.pdf');
-</script>
+```javascript
+slickPdfView('//pdfobject.com/pdf/sample.pdf');
 ```
 
 ## Basic Example Contained
@@ -91,10 +72,8 @@ The below example will render the viewer as html contained in a specific element
 ```html
 <!-- THE ELEMENT THAT WILL CONTAIN THE RENDERED VIEW -->
 <div id="appendToMe"></div>
-
-<script type="module">
-  import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
-  slickPdfView('#appendToMe', 'https://example.com/path/to/file.pdf');
+<script>
+  slickPdfView('#appendToMe', '//pdfobject.com/pdf/sample.pdf');
 </script>
 ```
 
@@ -103,13 +82,11 @@ The below example will render the viewer as html contained in a specific element
 The below example will render the viewer as html contained in 2 specific elements.
 
 ```html
-<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
-
 <div id="append-to-me-1" style="width:500px; height:500px;"></div>
 <div id="append-to-me-2" style="width:500px; height:500px;"></div>
 <script>
-  slickPdfLoader('#append-to-me-1','https://example.com/path/to/file.pdf');
-  slickPdfLoader('#append-to-me-2','https://example.com/path/to/file.pdf');
+  slickPdfView('#append-to-me-1','//pdfobject.com/pdf/sample.pdf');
+  slickPdfView('#append-to-me-2','//pdfobject.com/pdf/sample.pdf');
 </script>
 ```
 
@@ -117,30 +94,27 @@ The below example will render the viewer as html contained in 2 specific element
 
 The below example will render the viewer as html and using additional options.
 
-```html
-<script type="module">
-  import '//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfViewer.min.mjs';
-  slickPdfView({
-    fileName  : 'custom-file-name.pdf', //CUSTOM NAME WHEN DOWNLOADING/PRINTING AND IN THE TITLE BAR
-    fileUrl   : 'https://example.com/path/to/file.pdf', //THE PATH TO THE PDF (CAN BE A FULL URL OR A RELATIVE PATH)
-    zoom      : 1.25, //ZOOM IN TO 125% WHEN LOADED
-    startPage : 2, //DISPLAY THE 2nd PAGE WHEN LOADED
-  });
-</script>
+```javascript
+slickPdfView({
+  fileName  : 'custom-file-name.pdf', //CUSTOM NAME WHEN DOWNLOADING/PRINTING AND IN THE TITLE BAR
+  fileUrl   : 'https://example.com/path/to/file.pdf', //THE PATH TO THE PDF (CAN BE A FULL URL OR A RELATIVE PATH)
+  zoom      : 1.25, //ZOOM IN TO 125% WHEN LOADED
+  startPage : 2, //DISPLAY THE 2nd PAGE WHEN LOADED
+});
 ```
 
 # Arguments
 
+The core class accepts 2 initial arguments. `wrapperSelector` and `options`.
 ```javascript
 slickPdfView(wrapperSelector, options)
 ```
 <br>
 
-The core class accepts 2 initial arguments. `wrapperSelector` and `options`.<br><br>
+### Argument Transformation
+  - If `wrapperSelector` is provided and `options` is not provided, the `options` value is set to the value passed for `wrapperSelector` and `wrapperSelector` is changed to `body`.
+  - If `options` is a string, `options` is changed to `options = {fileUrl: options}` and then merged with the default `options`.
 
-If `wrapperSelector` is provided and `options` is not provided, the `options` value is set to the value passed for `wrapperSelector` and `wrapperSelector` is changed to `body`.<br><br>
-
-If `options` is a string, `options` is changed to `options = {fileUrl: options}` and then merged with the default `options`.<br><br><br>
 
 This allows for a flexible combination of use cases.
 ```javascript
