@@ -7551,6 +7551,7 @@ function dispatchEvent(eventType) {
     cancelable: false,
     detail: "custom"
   });
+  console.log(eventType);
   window.dispatchEvent(event);
 }
 function abort() {
@@ -13517,6 +13518,15 @@ const PDFViewerApplication = {
     if (file) {
       this.open({
         url: file
+      }).then(() => {
+        const event = new CustomEvent("viewerFileLoaded", {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            source: window
+          }
+        });
+        document.dispatchEvent(event);
       });
     } else {
       this._hideViewBookmark();
