@@ -1389,6 +1389,7 @@ class EventBus {
     }
   }
   _on(eventName, listener, options = null) {
+    //console.log(eventName, options);
     let rmAbort = null;
     if (options?.signal instanceof AbortSignal) {
       const {
@@ -11238,6 +11239,13 @@ class PDFViewer {
         source: this,
         pagesCount
       });
+
+      document.dispatchEvent(new CustomEvent("viewer.pages.loaded", {
+        bubbles: true,
+        cancelable: true,
+        detail: {pageCount: pagesCount}
+      }));
+      //console.log('pages loaded', this);
     }, () => {});
     const onBeforeDraw = evt => {
       const pageView = this._pages[evt.pageNumber - 1];
@@ -11625,6 +11633,7 @@ class PDFViewer {
       }
       const pageWidthScale = (this.container.clientWidth - hPadding) / currentPage.width * currentPage.scale / this.#pageWidthScaleFactor;
       const pageHeightScale = (this.container.clientHeight - vPadding) / currentPage.height * currentPage.scale;
+      //if(value == 'auto') value = 'page-fit';
       switch (value) {
         case "page-actual":
           scale = 1;
@@ -11639,7 +11648,7 @@ class PDFViewer {
           scale = Math.min(pageWidthScale, pageHeightScale);
           break;
         case "auto":
-          const horizontalScale = isPortraitOrientation(currentPage) ? pageWidthScale : Math.min(pageHeightScale, pageWidthScale);
+          const horizontalScale = !isPortraitOrientation(currentPage) ? pageWidthScale : Math.min(pageHeightScale, pageWidthScale);
           scale = Math.min(MAX_AUTO_SCALE, horizontalScale);
           break;
         default:
@@ -12494,6 +12503,13 @@ class SecondaryToolbar {
   }
   setPageNumber(pageNumber) {
     this.pageNumber = pageNumber;
+    document.dispatchEvent(new CustomEvent("viewer.pageNumber.changed", {
+      bubbles: true,
+      cancelable: true,
+      detail: {
+        pageNumber: pageNumber,
+      }
+    }));
     this.#updateUIState();
   }
   setPagesCount(pagesCount) {
@@ -14290,14 +14306,24 @@ const PDFViewerApplication = {
   },
   fitPageHeight(evt){
   	this.pdfViewer.currentScaleValue = 'page-fit';
-  	evt.pageFitHeightButton.classList.add('hidden');
-  	evt.pageFitWidthButton.classList.remove('hidden');
+    try{
+      evt.pageFitHeightButton.classList.add('hidden');
+      evt.pageFitWidthButton.classList.remove('hidden');
+    }
+    catch{
+      //SILENT
+    }
+
   },
   fitPageWidth(evt){
-  	console.log('here');
   	this.pdfViewer.currentScaleValue = 'page-width';
-  	evt.pageFitHeightButton.classList.remove('hidden');
-  	evt.pageFitWidthButton.classList.add('hidden');
+    try{
+      evt.pageFitHeightButton.classList.remove('hidden');
+      evt.pageFitWidthButton.classList.add('hidden');
+    }
+    catch{
+      //SILENT
+    }
   },
   bindEvents() {
     if (this._eventBusAbortController) {
@@ -14658,6 +14684,20 @@ function onUpdateViewarea({
   if (this.appConfig.secondaryToolbar) {
     this.appConfig.secondaryToolbar.viewBookmarkButton.href = this.pdfLinkService.getAnchorUrl(location.pdfOpenParams);
   }
+  //console.log(this.appConfig.toolbar.scaleSelectInput.value);
+  document.dispatchEvent(new CustomEvent("sp.viewer.updated", {
+    bubbles: true,
+    cancelable: true,
+    detail: {
+      //location: location,
+      page: location.pageNumber,
+      zoom: Number(this.appConfig.toolbar.scaleSelectInput.value),
+      //scrollLeft: location.left,
+      //scrollTop: location.top,
+      rotation: location.rotation
+    }
+  }));
+  //console.log('viewerUpdated here')
 }
 function onViewerModesChanged(name, evt) {
   if (this.isInitialViewSet && !this.pdfViewer.isInPresentationMode) {
@@ -14704,6 +14744,15 @@ function onPageNumberChanged(evt) {
   if (evt.value !== pdfViewer.currentPageNumber.toString() && evt.value !== pdfViewer.currentPageLabel) {
     this.toolbar?.setPageNumber(pdfViewer.currentPageNumber, pdfViewer.currentPageLabel);
   }
+    /*
+    document.dispatchEvent(new CustomEvent("viewer.pageNumber.changed", {
+      bubbles: true,
+      cancelable: true,
+      detail: {
+        pageNumber: evt.value,
+      }
+    }));
+    */
 }
 function onImageAltTextSettings() {
   this.imageAltTextSettings?.open({
@@ -15228,8 +15277,8 @@ window.PDFViewerApplicationOptions = AppOptions;
 var slickPdfViewDefaults = {
 	fileName 		: null,
 	fileUrl 		: null,
-	zoom 			: 'auto',
-	startpage 		: 1,
+	zoom 			  : 'auto',
+	startpage 	: 1,
 	padding 		: 40,
 	minScale 		: 0.25,
 	maxScale 		: 4,
