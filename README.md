@@ -43,7 +43,7 @@ To begin using slickPdf you will need to inclue the library.
 <!-- FROM CDN -->
 <script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
 
-<!-- LOCALLY HOSTED -->
+<!-- OR FROM LOCALLY HOSTED -->
 <script src="/path/to/slickPdfLoader.js"></script>
 ```
 
@@ -90,6 +90,15 @@ slickPdfView({
   fileUrl   : 'https://example.com/path/to/file.pdf', //THE PATH TO THE PDF (CAN BE A FULL URL OR A RELATIVE PATH)
   zoom      : 1.25, //ZOOM IN TO 125% WHEN LOADED
   startPage : 2, //DISPLAY THE 2nd PAGE WHEN LOADED
+});
+```
+
+## Getting the Instance
+
+```javascript
+var viewer1;
+slickPdfView('//pdfobject.com/pdf/sample.pdf').then( instance => {
+  viewer1 = instance;
 });
 ```
 
@@ -140,18 +149,67 @@ slickPdfView('#apendToMe > .someElement > #someElementId', {
   fileName: 'new-name.pdf',
   fileUrl: '/path/to/file.pdf'
 });
+```
 
-//KITCHEN SINK EXAMPLE: THIS WILL RENDER THE VIEWER DIRECTLY TO A SPECIFIC ELEMENT AND SET SEVERAL OPTIONS
+### Kitchen Sink Example... Using all options, events, methods and properties
+
+```html
+<script src="//cdn.jsdelivr.net/gh/bmooreitul/slickPdfViewer/slickPdfLoader.min.js"></script>
+
+<div id="appendToMe"></div>
+
+<script>
+var pdfUrl = '//assets.website-files.com/603d0d2db8ec32ba7d44fffe/603d0e327eb2748c8ab1053f_loremipsum.pdf';
 slickPdfView('#appendToMe', {
-  fileName       : 'new-name.pdf',      //CUSTOM NAME
-  fileUrl        : '/path/to/file.pdf', //URL
-  zoom           : 'page-height',       //INITIAL SCALE
-  startpage      : 3,                   //SHOW THE 3rd PAGE WHEN LOADED
-  padding        : 60,                  //ADD 60px PADDING TO THE INSIDE OF THE VIEWER
-  minScale       : 0.1,                 //LIMIT THE MINIMUM ZOOM TO 10%
-  maxScale       : 5,                   //LIMIT THE MAX ZOOM TO 500%
-  thumbnails     : true,                //DISPLAY THE THUMBNAIL PANEL ON LOAD
+    fileName       : 'custom-name.pdf',     //CUSTOM NAME
+    fileUrl        : pdfUrl,                //URL
+    zoom           : 'page-height',         //INITIAL SCALE
+    startpage      : 5,                     //SHOW THE 3rd PAGE WHEN LOADED
+    padding        : 60,                    //ADD 60px PADDING TO THE INSIDE OF THE VIEWER
+    minScale       : 0.1,                   //LIMIT THE MINIMUM ZOOM TO 10%
+    maxScale       : 5,                     //LIMIT THE MAX ZOOM TO 500%
+    thumbnails     : true,                  //DISPLAY THE THUMBNAIL PANEL ON LOAD
+
+    //LISTEN FOR ZOOM CHANGE
+    onZoomChange: zoom => {
+        console.log('zoom changed', zoom, this);
+    },
+
+    //LISTEN FOR PAGE CHANGE
+    onPageChange: pageNumber => {
+        console.log('page changed', pageNumber, this);
+    },
+}).then(instance => {
+
+    console.log('viewer ready', instance);  //INSTANCE HAS LOADED
+    
+    //DYNAMIC ATTRIBUTES (GETTERS)
+    console.log(instance.currentPage);      //GET THE CURRENT PAGE NUMBER
+    console.log(instance.wrapperEle);       //GET THE WRAPPER ELEMENT HTML OBJECT
+    console.log(instance.frameElement);     //GET THE FRAME ELEMENT HTML OBJECT
+    console.log(instance.zoom);             //GET THE CURRENT ZOOM PERCENT
+    console.log(instance.fileName);         //GET THE PDF FILE NAME
+    console.log(instance.pageCount);        //GET THE NUMBER OF PAGES
+    console.log(instance.info);             //GET THE DOCUMENT INFORMATION
+    console.log(instance.viewerApp);        //GET THE PDFJS VIEWER APPLICATION
+    
+    //DYNAMIC ATTRIBUTES (SETTERS)
+    instance.zoom       = '50%';            //SET THE ZOOM TO 50%
+    instance.fileName   = 'new-name.pdf';   //RENAME THE FILE
+
+    //METHODS
+    console.log(instance.Id());             //GET THE UNIQUE ID FOR THIS INSTANCE
+    instance.zoomIn();                      //INCREASE ZOOM
+    instance.zoomOut();                     //DECREASE ZOOM
+    instance.goToPage(3);                   //JUMP TO THE 3rd PAGE
+    instance.fitPageWidth();                //ZOOM IN/OUT TO FULL PAGE WIDTH
+    instance.fitPageHeight();               //ZOOM IN/OUT TO FULL PAGE HEIGHT
+    console.log(instance.currentPageObj()); //GET THE CURRENT PAGE AS AN OBJECT
+    console.log(instance.pages());          //GET AN ARRAY OF PAGE OBJECTS
+    instance.print();                       //TRIGGER THE PRINT DIALOG
+    instance.download();                    //TRIGGER DOWNLOAD
 });
+</script>
 ```
 
 # Options
@@ -182,117 +240,6 @@ Here are the default options when instantiating the SlickPdfView class.
 | minScale | *Optional* numeric value to limit zooming out. For example `0.25` for 25% `0.5` for 50% etc |
 | maxScale | *Optional* numeric value to limit zooming in. For example `1.25` for 125% `4` for 400% etc |
 | thumbnails | *Optional* value to display thumbnail sidebar. `true` to show, `false` to hide, or `null` <br> *This value is automatically set from local storage if the user has toggled this option previously and this is not provided/is null.* |
-
-
-# Methods
-- [Id](#id)
-- [zoomIn](#zoomin)
-- [zoomOut](#zoomout)
-- [zoomTo](#zoomto)
-- [fitPageWidth](#fitpagewidth)
-- [fitPageHeight](#fitpageheight)
-- [pages](#pages)
-- [currentPageObj](#currentpageobj)
-- [goToPage](#gotopage)
-- [download](#download)
-- [print](#print)
-
-
-### Id
-Retrieve the generated/passed unique id of the instance
-
-```javascript
-instance.Id();
-```
-
-### zoomIn
-Trigger the viewer to zoom in
-
-```javascript
-instance.zoomIn();
-```
-
-### zoomOut
-Trigger the viewer to zoom out
-
-```javascript
-instance.zoomOut();
-```
-
-### zoomTo
-Trigger the viewer to zoom in/out to a specific size
-
-```javascript
-//CHANGE THE ZOOM LEVEL TO 50%
-instance.zoomTo(50);
-```
-
-### fitPageWidth
-Trigger the viewer to zoom in/out so the page width fits in the view
-
-```javascript
-instance.fitPageWidth();
-```
-
-### fitPageHeight
-Trigger the viewer to zoom in/out so the page height fits in the view
-
-```javascript
-instance.fitPageHeight();
-```
-
-### pages
-Get an array of page objects
-
-```javascript
-instance.pages();
-```
-
-### currentPageObj
-Get the current page as an object
-
-```javascript
-instance.currentPageObj();
-```
-
-### goToPage
-Jump to a specific page using a page number
-
-```javascript
-//JUMP TO PAGE 3
-instance.goToPage(3);
-```
-
-### download
-Trigger the document to begin downloading
-
-```javascript
-instance.download();
-```
-
-### print
-Trigger the document to begin printing
-
-```javascript
-instance.print();
-```
-
-# Dynamic Attributes (getters)
-- wrapperEle
-- frameEle
-- viewerApp
-- pageCount
-- zoom
-- fileName
-- info
-
-# Dynamic Attributes (setters)
-- zoom
-- fileName
-
-# Events
-- onPageChange
-- onZoomChange
 
 
 ## All Features Confirmed working in these browsers</summary> 
