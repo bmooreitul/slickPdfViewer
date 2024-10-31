@@ -5,13 +5,11 @@ const slickPdfModulePath = document.currentScript.src.replace('slickPdfLoader.js
 
 //LOAD A VIEWER
 async function slickPdfLoader(wrapperSelector, settings){
-    const res = slickPdfView(wrapperSelector, settings);
-    return await res;
+    return slickPdfView(wrapperSelector, settings);
 }
 
 async function slickPdfView(wrapperSelector, settings){
-    const res = new SlickPdfViewer(wrapperSelector, settings);
-    return await $res;
+    return new SlickPdfViewer(wrapperSelector, settings);
 }
 
 class SlickPdfViewer {
