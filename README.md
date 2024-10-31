@@ -93,13 +93,27 @@ slickPdfView({
 });
 ```
 
-# Arguments
+## Arguments
 
 The core class accepts 2 initial arguments. `wrapperSelector` and `options`.
 ```javascript
+/**
+ *  Instantiate a new SlickPdfViewer class.
+ *
+ * Instantiate a new SlickPdfViewer class and apply the arguments.
+ * If the only argument supplied is `wrapperSelector`, then `options` is set to the value provided in `wrapperSelector` and `wrapperSelector` is set to 'body'.
+ * If the `options` value is a string, then the `options` value is converted to `options = {fileUrl: options}`.
+ * If the `options.fileUrl` is set, the class will automatically attempt to render the viewer.
+ * If the `options.fileUrl` is not set, the viewer is not automatically rendered.
+ *
+ * @param {string|object|null} wrapperSelector - The element that the viewer will be appended to as a child. 
+ * @param {string|object|null} options - The options for initial rendering.
+ *
+ * @return {Promise} Returns a promise object that resolves to a SlickPdfViewer instance.
+ */
 slickPdfView(wrapperSelector, options)
 ```
-<br>
+
 
 ### Argument Transformation
   - If `wrapperSelector` is provided and `options` is not provided, the `options` value is set to the value passed for `wrapperSelector` and `wrapperSelector` is changed to `body`.
