@@ -17,15 +17,7 @@ You can see demos here [Single Page](https://jsfiddle.net/bmooreitul/twcn1d0y/) 
  :heavy_check_mark: Responsive<br>
  :x: Netscape/Juno/AOL/Explorer. Not catering to 30 year old "requirements" or other equally ridiculous cases<br>
 
-<details>
-  <summary>All Features Confirmed working in these browsers</summary> 
-:heavy_check_mark: Chrome Version 130.0.6723.58 (Mac)<br>
-:heavy_check_mark: Firefox 131.0.2 (Mac)<br>
-:heavy_check_mark: Safari 17.6 (Mac)<br>
-:heavy_check_mark: Edge Version 129.0.2792.89 (Windows)<br>
-:heavy_check_mark: Chrome Version 130.0.6723.70 (Windows)<br>
-:heavy_check_mark: Firefox 131.0.3 (Windows)<br>
-</details>
+
 
 
 ## In a Nutshell
@@ -44,8 +36,6 @@ Most of the time you will only need to use a couple lines of code to render the 
 
 
 # Usage
-
-## Include the package
 
 To begin using slickPdf you will need to inclue the library.
 
@@ -167,6 +157,7 @@ Here are the default options when instantiating the SlickPdfView class.
 }
 ```
 
+
 | Name | Description |
 | --- | --- |
 | fileUrl | The location of the pdf. This can be a full url or a relative path. |
@@ -177,6 +168,126 @@ Here are the default options when instantiating the SlickPdfView class.
 | minScale | *Optional* numeric value to limit zooming out. For example `0.25` for 25% `0.5` for 50% etc |
 | maxScale | *Optional* numeric value to limit zooming in. For example `1.25` for 125% `4` for 400% etc |
 | thumbnails | *Optional* value to display thumbnail sidebar. `true` to show, `false` to hide, or `null` <br> *This value is automatically set from local storage if the user has toggled this option previously and this is not provided/is null.* |
+
+
+# Methods
+- [Id](#id)
+- [zoomIn](#zoomin)
+- [zoomOut](#zoomout)
+- [zoomTo](#zoomto)
+- [fitPageWidth](#fitpagewidth)
+- [fitPageHeight](#fitpageheight)
+- [pages](#pages)
+- [currentPageObj](#currentpageobj)
+- [goToPage](#gotopage)
+- [download](#download)
+- [print](#print)
+
+
+### Id
+Retrieve the generated/passed unique id of the instance
+
+```javascript
+instance.Id();
+```
+
+### zoomIn
+Trigger the viewer to zoom in
+
+```javascript
+instance.zoomIn();
+```
+
+### zoomOut
+Trigger the viewer to zoom out
+
+```javascript
+instance.zoomOut();
+```
+
+### zoomTo
+Trigger the viewer to zoom in/out to a specific size
+
+```javascript
+//CHANGE THE ZOOM LEVEL TO 50%
+instance.zoomTo(50);
+```
+
+### fitPageWidth
+Trigger the viewer to zoom in/out so the page width fits in the view
+
+```javascript
+instance.fitPageWidth();
+```
+
+### fitPageHeight
+Trigger the viewer to zoom in/out so the page height fits in the view
+
+```javascript
+instance.fitPageHeight();
+```
+
+### pages
+Get an array of page objects
+
+```javascript
+instance.pages();
+```
+
+### currentPageObj
+Get the current page as an object
+
+```javascript
+instance.currentPageObj();
+```
+
+### goToPage
+Jump to a specific page using a page number
+
+```javascript
+//JUMP TO PAGE 3
+instance.goToPage(3);
+```
+
+### download
+Trigger the document to begin downloading
+
+```javascript
+instance.download();
+```
+
+### print
+Trigger the document to begin printing
+
+```javascript
+instance.print();
+```
+
+# Dynamic Attributes (getters)
+- wrapperEle
+- frameEle
+- viewerApp
+- pageCount
+- zoom
+- fileName
+- info
+
+# Dynamic Attributes (setters)
+- zoom
+- fileName
+
+# Events
+- onPageChange
+- onZoomChange
+
+
+## All Features Confirmed working in these browsers</summary> 
+:heavy_check_mark: Chrome Version 130.0.6723.58 (Mac)<br>
+:heavy_check_mark: Firefox 131.0.2 (Mac)<br>
+:heavy_check_mark: Safari 17.6 (Mac)<br>
+:heavy_check_mark: Edge Version 129.0.2792.89 (Windows)<br>
+:heavy_check_mark: Chrome Version 130.0.6723.70 (Windows)<br>
+:heavy_check_mark: Firefox 131.0.3 (Windows)<br>
 
 ## Untested browsers:
 - Opera (Mac)
